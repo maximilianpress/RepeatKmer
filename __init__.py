@@ -1,2 +1,2 @@
-from .repeat_kmer import repeat_kmer
+from .RepeatKmer import repeat_kmer
 

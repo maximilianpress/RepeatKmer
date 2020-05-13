@@ -11,8 +11,8 @@ maximilianpress
 from __future__ import print_function
 import unittest
 import math
-import repeat_kmer as rk
-from repeat_kmer import KmerError
+import RepeatKmer.RepeatKmer.repeat_kmer as rk
+from RepeatKmer.RepeatKmer.repeat_kmer import KmerError
 
 SEQ_FILE = "test_collateral/test_genome.fa"
 REP_SEQ_FILE = "test_collateral/test_genome_repeat.fa"
