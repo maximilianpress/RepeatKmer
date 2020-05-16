@@ -19,7 +19,7 @@ from Bio import SeqIO
 from copy import deepcopy
 import RepeatKmer.RepeatKmer.kmer_utils as ku
 from RepeatKmer.RepeatKmer.kmer_tree import KmerTree
-from RepeatKmer.RepeatKmer.kmer_node import KmerNode
+#from RepeatKmer.RepeatKmer.kmer_node import KmerNode
 
 def main():
     c_args = ku.parse_args()
