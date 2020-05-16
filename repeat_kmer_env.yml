@@ -7,4 +7,6 @@ dependencies:
   - numpy
   - pandas
   - biopython
+  - fuzzywuzzy
   - pytest
+

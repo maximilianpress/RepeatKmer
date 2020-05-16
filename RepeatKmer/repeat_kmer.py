@@ -3,7 +3,7 @@
 maximilian press
 12/11/19
 
-/path/to/repeat_kmer.py
+RepeatKmer/RepeatKmer/repeat_kmer.py
 
 Use a simplistic k-mer tree strategy with a greedy pruning heuristic to 
 find overrepresented (repetitive) sequences in a genome.
@@ -14,6 +14,7 @@ import argparse
 import logging
 import pandas as pd
 import numpy as np
+import fuzzywuzzy as fuzz
 from Bio import SeqIO
 from copy import deepcopy
 
@@ -92,6 +93,8 @@ class KmerNode:
         self.alt_model_params = alt_model_params
         self._children_proportions = None
         self._d_score = None
+        self.substring_of = None
+        self.superstring_of = None
 
         if self.parent is not None:
             self.parent.children.append(self)
@@ -476,7 +479,7 @@ class KmerTree:
             self._maximal_kmers.append(kmer.parent)
 
 
-    def _yield_maximal_repeats(self):
+    def yield_maximal_repeats(self):
         '''Output full results of greedy tree extension.'''
         pass
 
@@ -499,7 +502,16 @@ class KmerTree:
                 self._to_dfs.remove(kmer_node)
 
     def _infer_kmer_relationships(self):
-        '''Infer which k-mers have substring/superstring relationships'''
+        '''Infer which k-mers have (fuzzy) substring/superstring relationships.
+        (Use fuzz.partial_ratio() to do heavy lifting)'''
+        pass
+
+    def _infer_tandemness(self):
+        '''Infer whether some repeats are tandems of others'''
+        pass
+
+    def write_results(self):
+        '''Write maximal results to disk.'''
         pass
 
 class KmerError(ValueError):
@@ -594,6 +606,8 @@ def main():
                     out_prefix=c_args["out_prefix"])
     tree.grow_the_tree()
     tree.select_maximal_repeats()
+    tree.yield_maximal_repeats()
+    tree.write_results()
     return 0
 
 
