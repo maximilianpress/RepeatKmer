@@ -12,14 +12,18 @@ from __future__ import print_function
 import unittest
 import math
 import RepeatKmer.RepeatKmer.repeat_kmer as rk
-from RepeatKmer.RepeatKmer.repeat_kmer import KmerError
+#from RepeatKmer.RepeatKmer.repeat_kmer import KmerError
+import RepeatKmer.RepeatKmer.kmer_utils as ku
+from RepeatKmer.RepeatKmer.kmer_tree import KmerTree
+from RepeatKmer.RepeatKmer.kmer_node import KmerNode
+
 
 SEQ_FILE = "test_collateral/test_genome.fa"
 REP_SEQ_FILE = "test_collateral/test_genome_repeat.fa"
 
 class RepKmerTestCase(unittest.TestCase):
     def setUp(self):
-        self.Tree = rk.KmerTree(genome_file=SEQ_FILE, root_k=1)
+        self.Tree = KmerTree(genome_file=SEQ_FILE, root_k=1)
         self.Tree.make_genome_seq()
 
     def tearDown(self):
@@ -41,9 +45,9 @@ class RepKmerTestCase(unittest.TestCase):
 
     def test_kmer_str_assert(self):
         with self.assertRaises(AssertionError):
-            k = rk.KmerNode(seq=0, parent=None)
+            k = KmerNode(seq=0, parent=None)
         with self.assertRaises(AssertionError):
-            k = rk.KmerNode(seq=None, parent=None)
+            k = KmerNode(seq=None, parent=None)
 
     def test_make_genome(self):
         self.assertEqual(len(self.Tree.genome), 8)
@@ -75,7 +79,7 @@ class RepKmerTestCase(unittest.TestCase):
         self.assertEqual(self.Tree.access_kmer("TCACTTTT").count, 1)
 
     def test_count_fails_wo_genome(self):
-        nocount_tree = self.Tree = rk.KmerTree(genome_file=SEQ_FILE, root_k=1,
+        nocount_tree = self.Tree = KmerTree(genome_file=SEQ_FILE, root_k=1,
                                                should_count=False)
         self.Tree._initialize_kmers()
         with self.assertRaises(ValueError):
@@ -85,34 +89,34 @@ class RepKmerTestCase(unittest.TestCase):
         '''Test computation of log-likelihoods of different models'''
         model = {"A": .2, "C": .2, "G": .3, "T": .3}
         data = {"A": 10, "C": 0, "G": 0, "T": 0}
-        self.assertAlmostEqual(rk.log_likelihood(data=data, model=model),
+        self.assertAlmostEqual(ku.log_likelihood(data=data, model=model),
                                math.log(math.pow(.2, 10)))
 
         data = {"A": 20, "C": 20, "G": 30, "T": 30}
-        self.assertAlmostEqual(rk.log_likelihood(data=data, model=model),
+        self.assertAlmostEqual(ku.log_likelihood(data=data, model=model),
                                math.log(math.pow(.2, 20)) +
                                math.log(math.pow(.2, 20)) +
                                math.log(math.pow(.3, 30)) +
                                math.log(math.pow(.3, 30)))
 
         data = {"A": 10, "C": 0, "G": 0, "T": 0}
-        self.assertAlmostEqual(rk.log_likelihood_ratio(data=data, num_model=model,
+        self.assertAlmostEqual(ku.log_likelihood_ratio(data=data, num_model=model,
                                                        denom_model=model), 0)
         model2 = {"A": 1.0, "C": 0., "G": 0., "T": 0.}
-        self.assertAlmostEqual(rk.log_likelihood_ratio(data=data, num_model=model,
+        self.assertAlmostEqual(ku.log_likelihood_ratio(data=data, num_model=model,
                                                        denom_model=model2),
-                               rk.log_likelihood(data=data, model=model))
+                               ku.log_likelihood(data=data, model=model))
 
         model3 = {}
         with self.assertRaises(KeyError):
-            rk.log_likelihood(data=data, model=model3)
+            ku.log_likelihood(data=data, model=model3)
 
         with self.assertRaises(KeyError):
-            rk.log_likelihood_ratio(data=data, num_model=model, denom_model=model3)
+            ku.log_likelihood_ratio(data=data, num_model=model, denom_model=model3)
 
     def test_calc_aic_c(self):
         '''Test numerical computation of AICc'''
-        aic_c = rk.calc_aic_c(ll=-10, n_param=1, num_obs=10)
+        aic_c = ku.calc_aic_c(ll=-10, n_param=1, num_obs=10)
         aic = 22
         full = aic + ((2*1^2 + 2*1) / (10-1-1))
         self.assertEqual(aic_c, full)
@@ -152,7 +156,7 @@ class RepKmerTestCase(unittest.TestCase):
         }
         model = self.Tree._yield_model_for_kmer(kmer)
         self.assertDictEqual(model, true_model)
-        with self.assertRaises(KmerError):
+        with self.assertRaises(ku.KmerError):
             self.Tree.model[kmer.stem_seq] = None
             self.Tree._yield_model_for_kmer(kmer)
 
@@ -173,9 +177,9 @@ class RepKmerTestCase(unittest.TestCase):
         }
         self.assertAlmostEqual(kmer.nt_model["T"], 0.2631579)
         self.assertAlmostEqual(kmer.alt_model["T"], 1.0)
-        alt_aic = rk.calc_aic_c(rk.log_likelihood(data=data, model=kmer.alt_model),
+        alt_aic = ku.calc_aic_c(ku.log_likelihood(data=data, model=kmer.alt_model),
                                 n_param=7, num_obs=1)
-        null_aic = rk.calc_aic_c(rk.log_likelihood(data=data, model=kmer.nt_model),
+        null_aic = ku.calc_aic_c(ku.log_likelihood(data=data, model=kmer.nt_model),
                                  n_param=3, num_obs=1)
 
         #print(kmer.alt_model, kmer.nt_model, kmer.dAIC, alt_aic, null_aic)
@@ -195,13 +199,13 @@ class RepKmerTestCase(unittest.TestCase):
         kmer = self.Tree.access_kmer("ATC")
         kmer_child = self.Tree.access_kmer("ATCA")
         self.assertEqual(kmer.child_proportion(kmer_child), (2.0 / 3.0))
-        with self.assertRaises(KmerError):
+        with self.assertRaises(ku.KmerError):
             kmer_child.child_proportion(kmer)
 
-    @unittest.expectedFailure
+    #@unittest.expectedFailure
     def test_d_segment_finder(self):
         '''Test D-segment heuristic for maximal repeats'''
-        self.Tree = rk.KmerTree(genome_file=REP_SEQ_FILE, root_k=1)
+        self.Tree = KmerTree(genome_file=REP_SEQ_FILE, root_k=1)
         self.Tree.make_genome_seq()
         self.assertEqual(self.Tree._genome_length, 139)
         self.Tree._initialize_kmers()
