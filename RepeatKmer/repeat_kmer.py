@@ -10,13 +10,6 @@ find overrepresented (repetitive) sequences in a genome.
 
 """
 from __future__ import print_function
-import argparse
-import logging
-import pandas as pd
-import numpy as np
-import fuzzywuzzy as fuzz
-from Bio import SeqIO
-from copy import deepcopy
 import RepeatKmer.RepeatKmer.kmer_utils as ku
 from RepeatKmer.RepeatKmer.kmer_tree import KmerTree
 #from RepeatKmer.RepeatKmer.kmer_node import KmerNode
