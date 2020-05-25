@@ -212,5 +212,8 @@ class RepKmerTestCase(unittest.TestCase):
         self.Tree._generate_models_from_stem()
         self.Tree.grow_the_tree()
         self.Tree.select_maximal_repeats()
-        self.assertIn(self.Tree.access_kmer("A"),
+        self.assertIn(self.Tree.access_kmer("CAACAT"),
                       self.Tree._maximal_kmers)
+        self.assertNotIn(self.Tree.access_kmer("CAACA"),
+                         self.Tree._maximal_kmers)
+
