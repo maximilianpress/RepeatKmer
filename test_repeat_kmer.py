@@ -59,13 +59,14 @@ class RepKmerTestCase(unittest.TestCase):
 
     def test_genome_nt_freq_init(self):
         '''test to make sure that the initial nt freqs are correct (for use as model).'''
-        self.assertEqual(self.Tree.nt_freqs["G"], 0.0)
-        self.assertAlmostEqual(self.Tree.nt_freqs["T"], 0.2631579)
-        self.assertAlmostEqual(self.Tree.nt_freqs["C"], 0.3421053)
-        self.assertAlmostEqual(self.Tree.nt_freqs["A"], 0.3947368)
+        self.assertAlmostEqual(self.Tree.nt_freqs["G"], 0.1710526)
+        self.assertAlmostEqual(self.Tree.nt_freqs["T"], 0.3289474)
+        self.assertAlmostEqual(self.Tree.nt_freqs["C"], 0.1710526)
+        self.assertAlmostEqual(self.Tree.nt_freqs["A"], 0.3289474)
         self.assertAlmostEqual(sum(self.Tree.nt_freqs.values()), 1.0)
 
     def test_count_kmers(self):
+        '''Ensure that the nucleotide counts themselves are correct.'''
         self.Tree._initialize_kmers()
         self.assertEqual(self.Tree.access_kmer("G").count, 13)
         self.assertEqual(self.Tree.access_kmer("A").count, 25)
@@ -80,7 +81,7 @@ class RepKmerTestCase(unittest.TestCase):
 
     def test_count_fails_wo_genome(self):
         nocount_tree = self.Tree = KmerTree(genome_file=SEQ_FILE, root_k=1,
-                                               should_count=False)
+                                            should_count=False)
         self.Tree._initialize_kmers()
         with self.assertRaises(ValueError):
             nocount_tree.all_kmers[1]["A"]._count_occurrences()
