@@ -115,9 +115,6 @@ class KmerTree:
             # if a model is set, use that.
             new_leaves = []
             for kmer in self._leaf_kmers:
-                #if self.leaf_length > 8:
-                    #print(self.model["ATGATAG"], "ATGATAG" in self.model)
-
                 nt_model = self._yield_model_for_kmer(kmer)  # is self.nt_freqs if not populated
                 for nt in ku.NTS:
                     new_leaf = KmerNode(seq=kmer.seq + nt, parent=kmer,
@@ -284,7 +281,6 @@ class KmerTree:
         # store each such notable kmer in an appropriate structure.
         self._maximal_kmers = list()
         self._to_dfs = [self.access_kmer(nt) for nt in ku.NTS]
-        #self._traverse_paths_to_tips()
         # easier to just DFS the tree once?
         while len(self._to_dfs) > 0:
             for kmer_node in self._to_dfs:

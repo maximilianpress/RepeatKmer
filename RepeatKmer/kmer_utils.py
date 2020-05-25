@@ -17,7 +17,6 @@ from Bio import SeqIO
 from copy import deepcopy
 
 
-
 NTS = ["A", "C", "G", "T"]
 TAB = str.maketrans("ACGTN", "TGCAN")
 UNIFORM_NT_MODEL = {

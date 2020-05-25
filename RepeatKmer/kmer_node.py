@@ -16,7 +16,6 @@ import fuzzywuzzy as fuzz
 from Bio import SeqIO
 from copy import deepcopy
 import RepeatKmer.RepeatKmer.kmer_utils as ku
-#from RepeatKmer.RepeatKmer.kmer_tree import KmerTree
 
 class KmerNode:
     '''An object to form a locus of analysis for a single k-mer. Links to other k-mers
@@ -24,8 +23,8 @@ class KmerNode:
     '''
     def __init__(self, seq, parent, genome=None, nt_model=ku.UNIFORM_NT_MODEL, root_k=None,
                  should_count=True, tree=None, daic_threshold=0.0001, ratio_threshold=1.0,
-                 freq_pseudocount=ku.FREQ_PSEUDOCOUNT,
-                 alt_model_params=ku.ALT_MODEL_PARAMS):
+                 freq_pseudocount=ku.FREQ_PSEUDOCOUNT, alt_model_params=ku.ALT_MODEL_PARAMS,
+                 changepoint_thresh=ku.PROP_THRESH):
         '''
         Args:
             seq ():
@@ -76,6 +75,7 @@ class KmerNode:
         self._d_score = None
         self.substring_of = None
         self.superstring_of = None
+        self.changepoint_thresh = changepoint_thresh
 
         if self.parent is not None:
             self.parent.children.append(self)
@@ -205,6 +205,6 @@ class KmerNode:
         return self._children_proportions[child]
 
     def segment_score(self):
-        '''compute a changepoint score for a given k-mer'''
-        pass
+        '''compute a changepoint score for a given k-mer (based on its children'''
+        return max([self.child_proportion(child) for child in self.children])
 
