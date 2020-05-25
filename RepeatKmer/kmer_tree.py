@@ -20,7 +20,7 @@ from RepeatKmer.RepeatKmer.kmer_node import KmerNode
 
 class KmerTree:
     def __init__(self, root_k, genome_file, should_count=True, dseg_threshold=0.8,
-                 out_prefix="out_kmer", logger=None):
+                 out_prefix="out_kmer", logger=None, debug=False):
         '''A tree structure to hold K-mers and their interrelationships.
 
         Args:
@@ -47,6 +47,7 @@ class KmerTree:
         self._maximal_kmers = None
         self._to_dfs = None
         self.kmer_result_table = None
+        self.debug = debug
 
         if logger is None:
             self.logger = logging.getLogger()
@@ -157,6 +158,12 @@ class KmerTree:
             leaf.populate_sisters()
             if model_calc:
                 leaf.estimate_daic()
+        if self.debug:
+            self.logger.error("(Not actually an error!)\nLeaf k-mers:\n{}".format(
+                "\n".join(" ".join(
+                    [k.seq, str(k.obs_exp_ratio), str(k.count), str(k.dAIC)]
+                ) for k in self._leaf_kmers)))
+
 
     def make_genome_seq(self):
         '''Generate a set of strings representing the forward and reverse complement of genome contigs. Doesn't track tig names.
@@ -164,7 +171,7 @@ class KmerTree:
         self.logger.info("Reading in genome seq from file {}".format(self.genome_file))
         longest_seq = 0
         self.genome = []
-        nt_counts = {nt : 0 for nt in ku.NTS}
+        nt_counts = {nt: 0 for nt in ku.NTS}
         total_length = 0
         with open(self.genome_file) as file:
             seq = ''
@@ -174,10 +181,12 @@ class KmerTree:
                         if len(seq) > longest_seq:
                             longest_seq = len(seq)
                         seq = seq.upper()
+                        rc_seq = ku.rev_comp(seq)
                         for nt in ku.NTS:
                             nt_counts[nt] += seq.count(nt)
+                            nt_counts[nt] += rc_seq.count(nt)
                         self.genome.append(seq)
-                        self.genome.append(ku.rev_comp(seq))
+                        self.genome.append(rc_seq)
                         total_length += len(seq)
                         seq = ''
                 else:
@@ -233,6 +242,11 @@ class KmerTree:
             nt_model = self.model[kmer.stem_seq]
 
         if nt_model is None:
+            if kmer.stem_seq not in self.genome:
+                self.logger.info("Substituting nucleotide frequencies for k-mer stem seq"
+                                 "sequence {}, absent from model.".format(kmer.stem_seq)
+                                 )
+                nt_model = self.nt_freqs
             raise ku.KmerError("could not get a model for k-mer {} with stem seq {}".format(kmer.seq, kmer.stem_seq))
 
         return nt_model

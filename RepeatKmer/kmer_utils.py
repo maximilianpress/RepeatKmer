@@ -30,8 +30,9 @@ UNIFORM_NT_MODEL = {
 # problematic- can then sum to >1!!
 FREQ_PSEUDOCOUNT = 0.001
 
-# num params for AIC calc (that is, extra params for alternative)
-ALT_MODEL_PARAMS = 4
+# num params for AIC calc
+NULL_MODEL_PARAMS = 3
+ALT_MODEL_PARAMS = 7
 
 # definition of maximal k-mers- the proportion of parent that you must represent
 PROP_THRESH = 0.9
@@ -87,7 +88,7 @@ def calc_aic_c(ll, n_param, num_obs):
     '''
     aic = (2 * n_param) - (2 * ll)
     # avoid divide by zero
-    if (num_obs - n_param - 1) == 0:
+    if (num_obs - n_param - 1) <= 0:
         aic_c = np.Inf
     else:
         aic_c = aic + (2 * n_param ^ 2 + 2 * n_param) / (num_obs - n_param - 1)

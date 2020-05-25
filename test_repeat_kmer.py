@@ -205,9 +205,9 @@ class RepKmerTestCase(unittest.TestCase):
     #@unittest.expectedFailure
     def test_d_segment_finder(self):
         '''Test D-segment heuristic for maximal repeats'''
-        self.Tree = KmerTree(genome_file=REP_SEQ_FILE, root_k=1)
+        self.Tree = KmerTree(genome_file=REP_SEQ_FILE, root_k=1, debug=True)
         self.Tree.make_genome_seq()
-        self.assertEqual(self.Tree._genome_length, 139)
+        self.assertEqual(self.Tree._genome_length, 331)
         self.Tree._initialize_kmers()
         self.Tree._generate_models_from_stem()
         self.Tree.grow_the_tree()

@@ -116,9 +116,10 @@ class KmerNode:
             data.update({self.terminal_nt: self.count})
             alt_ll = ku.log_likelihood(data=data, model=self.alt_model)
             null_ll = ku.log_likelihood(data=data, model=self.nt_model)
-            alt_aic_c = ku.calc_aic_c(ll=alt_ll, n_param=self.alt_model_params + 3,
-                                   num_obs=sum(data.values()))
-            null_aic_c = ku.calc_aic_c(ll=null_ll, n_param=3, num_obs=sum(data.values()))
+            alt_aic_c = ku.calc_aic_c(ll=alt_ll, num_obs=sum(data.values()),
+                                      n_param=self.alt_model_params)
+            null_aic_c = ku.calc_aic_c(ll=null_ll, n_param=ku.NULL_MODEL_PARAMS,
+                                       num_obs=sum(data.values()))
             self._alt_aic_c = alt_aic_c
             self._null_aic_c = null_aic_c
             self.dAIC = null_aic_c - alt_aic_c
@@ -170,8 +171,9 @@ class KmerNode:
                 sister.inferred_model = True
 
     def decide_if_should_prune_kmer(self):
-        '''use a heuristic based on dAIC (model for ALL the sisters) and obs/exp ratio (for specific k-mer)
-        to decide whether to prune this k-mer from the k-mer tree.
+        '''use a heuristic based on dAIC (model for ALL the sisters) and obs/exp ratio (for
+        specific k-mer) to decide whether to prune this k-mer from the k-mer tree.
+        I'd love to replace this nasty conditional.
         '''
         # when a certain gentleman arrived from rome
         if self.dAIC is None:
@@ -185,9 +187,14 @@ class KmerNode:
         elif (self.dAIC < self.daic_threshold) or (
                     self.obs_exp_ratio < self.ratio_threshold):
             self.should_prune = True
+        # this happens when you try to do np.inf - np.inf!
+        elif np.isnan(self.dAIC):
+            self.should_prune = True
 
         if self.should_prune is None:
-            raise ku.KmerError("was unable to decide whether or not to prune a k-mer!")
+            print(self.dAIC)
+            raise ku.KmerError("was unable to decide whether or not to prune a k-mer! "
+                               "dAIC {}".format(self.dAIC))
 
     def child_proportion(self, child):
         '''Estimate the proportion of the present k-mer represented by each child
