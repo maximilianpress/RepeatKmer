@@ -132,13 +132,13 @@ class RepKmerTestCase(unittest.TestCase):
 
     def test_kmer_aic(self):
         '''ensure that AICc of k-mer families is estimated accurately.'''
-        self.Tree.root_k = 8
+        self.Tree.root_k = 1
         self.Tree._initialize_kmers()
         self.Tree.grow_the_tree()
-        kmer = self.Tree.access_kmer("ACACACTAT")
+        kmer = self.Tree.access_kmer("ACAC")
         sisters = kmer._sisters
         # this stem seq defines models PASSED TO CHILDREN (not self)
-        self.assertEqual(kmer.stem_seq, "ACACTAT")
+        self.assertEqual(kmer.stem_seq, "ACA")
         self.assertEqual(kmer.dAIC, sisters[0].dAIC)
         self.assertEqual(sisters[0].dAIC, sisters[1].dAIC)
 
@@ -163,25 +163,27 @@ class RepKmerTestCase(unittest.TestCase):
 
     def test_generate_models_from_stem(self):
         '''Test that an initialized k-mer tree stem '''
-        self.Tree.root_k = 8
+        self.Tree.root_k = 1  #TODO: want this to be >1
         self.Tree._initialize_kmers()
         self.Tree._generate_models_from_stem()
         self.Tree.grow_the_tree()
-        kmer = self.Tree.access_kmer("ACACACTAT")
-        self.assertTrue("ACACTAT" in self.Tree.model)
-        self.assertIsNot(self.Tree.model["ACACTAT"], None)
+        kmer = self.Tree.access_kmer("AC")
+        self.assertTrue("A" in self.Tree.model)
+        self.assertIsNot(self.Tree.model["A"], None)
+
         data = {
-            "A": 0,
-            "C": 0,
-            "G": 0,
-            "T": 1
+            "A": 3,
+            "T": 8,
+            "G": 3,
+            "C": 9
         }
-        self.assertAlmostEqual(kmer.nt_model["T"], 0.2631579)
-        self.assertAlmostEqual(kmer.alt_model["T"], 1.0)
+
+        self.assertAlmostEqual(kmer.nt_model["C"], 0.17105263157894737)
+        self.assertAlmostEqual(kmer.alt_model["C"], 0.32)
         alt_aic = ku.calc_aic_c(ku.log_likelihood(data=data, model=kmer.alt_model),
-                                n_param=7, num_obs=1)
+                                n_param=7, num_obs=sum(data.values()))
         null_aic = ku.calc_aic_c(ku.log_likelihood(data=data, model=kmer.nt_model),
-                                 n_param=3, num_obs=1)
+                                 n_param=3, num_obs=sum(data.values()))
 
         #print(kmer.alt_model, kmer.nt_model, kmer.dAIC, alt_aic, null_aic)
         self.assertAlmostEqual(kmer.dAIC, null_aic-alt_aic)
@@ -206,7 +208,7 @@ class RepKmerTestCase(unittest.TestCase):
     #@unittest.expectedFailure
     def test_d_segment_finder(self):
         '''Test D-segment heuristic for maximal repeats'''
-        self.Tree = KmerTree(genome_file=REP_SEQ_FILE, root_k=1, debug=True)
+        self.Tree = KmerTree(genome_file=REP_SEQ_FILE, root_k=3, debug=True)
         self.Tree.make_genome_seq()
         self.assertEqual(self.Tree._genome_length, 331)
         self.Tree._initialize_kmers()

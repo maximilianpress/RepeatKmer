@@ -22,11 +22,13 @@ for tig in tigs:
     for nt in NTS:
         NT_COUNTS[nt] += str(tig.seq).upper().count(nt)
 
-print("Nucleotide frequencies (forward strand only):")
-[print(nt, NT_COUNTS[nt]) for nt in NTS]
+total = float(sum(NT_COUNTS.values()))
 
-print("Nucleotide frequencies (both strands):")
-print("A", NT_COUNTS["A"] + NT_COUNTS["T"])
-print("T", NT_COUNTS["A"] + NT_COUNTS["T"])
-print("C", NT_COUNTS["C"] + NT_COUNTS["G"])
-print("G", NT_COUNTS["C"] + NT_COUNTS["G"])
+print("Nucleotide counts and frequencies (forward strand only):")
+[print(nt, NT_COUNTS[nt], NT_COUNTS[nt] / total)  for nt in NTS]
+
+print("Nucleotide counts and frequencies (both strands):")
+print("A", NT_COUNTS["A"] + NT_COUNTS["T"], (NT_COUNTS["A"]+NT_COUNTS["T"]) / (2*total))
+print("T", NT_COUNTS["A"] + NT_COUNTS["T"], (NT_COUNTS["A"] + NT_COUNTS["T"]) / (2*total))
+print("C", NT_COUNTS["C"] + NT_COUNTS["G"], (NT_COUNTS["C"] + NT_COUNTS["G"]) / (2*total))
+print("G", NT_COUNTS["C"] + NT_COUNTS["G"], (NT_COUNTS["C"] + NT_COUNTS["G"]) / (2*total))
