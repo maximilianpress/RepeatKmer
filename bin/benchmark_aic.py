@@ -27,7 +27,7 @@ class Benchmark:
         self.count_of_obs[0] = 1
         self.null_model = null_model
 
-    def run_expt(self, count_of_others):
+    def run_expt(self, count_of_others, corrected=True):
         '''Run through the simulation to estimate power for one set of conditions.'''
         results = list()
         for i in self.count_of_obs:
@@ -42,20 +42,24 @@ class Benchmark:
             alt_model = {nt: data[nt] / total for nt in data}
             alt_ll = ku.log_likelihood(data=data, model=alt_model)
             null_ll = ku.log_likelihood(data=data, model=self.null_model)
-            alt_aic_c = ku.calc_aic_c(ll=alt_ll, num_obs=total,
-                                      n_param=ku.ALT_MODEL_PARAMS)
-            null_aic_c = ku.calc_aic_c(ll=null_ll, n_param=ku.NULL_MODEL_PARAMS,
-                                       num_obs=sum(data.values()))
-            results.append(null_aic_c - alt_aic_c)
+            if corrected:
+                alt = ku.calc_aic_c(ll=alt_ll, num_obs=total,
+                                          n_param=ku.ALT_MODEL_PARAMS)
+                null = ku.calc_aic_c(ll=null_ll, n_param=ku.NULL_MODEL_PARAMS,
+                                           num_obs=sum(data.values()))
+            else:
+                alt = ku.calc_aic(ll=alt_ll, n_param=ku.ALT_MODEL_PARAMS)
+                null = ku.calc_aic(ll=null_ll, n_param=ku.NULL_MODEL_PARAMS)
+            results.append(null - alt)
         return results
 
-    def run_analysis(self, other_counts=None):
+    def run_analysis(self, other_counts=None, corrected=True):
         other_counts = other_counts if other_counts is not None else {"Power": self.count_of_others}
         for run in other_counts:
-            self.results[run] = self.run_expt(count_of_others=other_counts[run])
-        self.plot_all_results()
+            self.results[run] = self.run_expt(count_of_others=other_counts[run], corrected=corrected)
+        #self.plot_all_results()
 
-    def plot_all_results(self):
+    def plot_all_results(self, f_suffix):
         '''Plot the results of the simulation. Not super familiar with matplotlib
         so I'm sure there's a better way to do this.'''
         plt.figure()
@@ -75,9 +79,9 @@ class Benchmark:
             lines.append(line)
             labels.append(sim)
             plt.plot([min_x, max_x], [0, 0], linestyle="dashed")
-            plt.title("Power analysis of AICc in finding overrepresented conditioned k-mers")
+            plt.title("Power analysis of {} in finding overrepresented conditioned k-mers".format(f_suffix))
         plt.legend()
-        plt.savefig(fname="power_results.png", dpi=300)
+        plt.savefig(fname="power_results_{}.png".format(f_suffix), dpi=300)
 
 
 if __name__ == "__main__":
@@ -89,5 +93,9 @@ if __name__ == "__main__":
         "10 of each other k-mer observed": 30
     }
     experiments = Benchmark(max_count=100)
-    experiments.run_analysis(other_counts=other_counts)
-    experiments.plot_all_results()
+    experiments.run_analysis(other_counts=other_counts, corrected=True)
+    experiments.plot_all_results(f_suffix="AICc")
+
+    experiments = Benchmark(max_count=100)
+    experiments.run_analysis(other_counts=other_counts, corrected=False)
+    experiments.plot_all_results(f_suffix="AIC")
