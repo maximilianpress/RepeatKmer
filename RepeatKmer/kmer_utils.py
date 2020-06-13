@@ -77,6 +77,14 @@ def log_likelihood_ratio(data, num_model, denom_model):
     llr = ll1 - ll2
     return llr
 
+def calc_aic(ll, n_param):
+    '''Compute Akaike information criterion given log-likelihoods and param numbers
+
+    :param ll: float, log-likelihood of model 1
+    :param param: int, param nums of model 1
+    :return: float, the AICc value.
+    '''
+    return (2 * n_param) - (2 * ll)
 
 def calc_aic_c(ll, n_param, num_obs):
     '''Compute Akaike information criterion (corrected) given log-likelihoods and param numbers
@@ -86,7 +94,7 @@ def calc_aic_c(ll, n_param, num_obs):
     :param num_obs: the number of observations, i.e. n
     :return: float, the AICc value.
     '''
-    aic = (2 * n_param) - (2 * ll)
+    aic = calc_aic(n_param=n_param, ll=ll)
     # avoid divide by zero
     if (num_obs - n_param - 1) <= 0:
         aic_c = np.Inf
