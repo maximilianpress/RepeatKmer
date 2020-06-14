@@ -24,7 +24,7 @@ class KmerNode:
     def __init__(self, seq, parent, genome=None, nt_model=ku.UNIFORM_NT_MODEL, root_k=None,
                  should_count=True, tree=None, daic_threshold=0.0001, ratio_threshold=1.0,
                  freq_pseudocount=ku.FREQ_PSEUDOCOUNT, alt_model_params=ku.ALT_MODEL_PARAMS,
-                 changepoint_thresh=ku.PROP_THRESH):
+                 changepoint_thresh=ku.PROP_THRESH, correct_aic=False):
         '''
         Args:
             seq ():
@@ -66,8 +66,8 @@ class KmerNode:
         self.freq_pseudocount = freq_pseudocount
         self.children = []
         self.stem_seq = None
-        self._alt_aic_c = None
-        self._null_aic_c = None
+        self._alt_aic = None
+        self._null_aic = None
         self.dAIC = None
         self.inferred_model = False
         self.alt_model_params = alt_model_params
@@ -76,6 +76,7 @@ class KmerNode:
         self.substring_of = None
         self.superstring_of = None
         self.changepoint_thresh = changepoint_thresh
+        self.correct_aic = correct_aic
 
         if self.parent is not None:
             self.parent.children.append(self)
@@ -116,13 +117,17 @@ class KmerNode:
             data.update({self.terminal_nt: self.count})
             alt_ll = ku.log_likelihood(data=data, model=self.alt_model)
             null_ll = ku.log_likelihood(data=data, model=self.nt_model)
-            alt_aic_c = ku.calc_aic_c(ll=alt_ll, num_obs=sum(data.values()),
-                                      n_param=self.alt_model_params)
-            null_aic_c = ku.calc_aic_c(ll=null_ll, n_param=ku.NULL_MODEL_PARAMS,
-                                       num_obs=sum(data.values()))
-            self._alt_aic_c = alt_aic_c
-            self._null_aic_c = null_aic_c
-            self.dAIC = null_aic_c - alt_aic_c
+            if self.correct_aic:
+                alt_aic = ku.calc_aic_c(ll=alt_ll, num_obs=sum(data.values()),
+                                        n_param=self.alt_model_params)
+                null_aic = ku.calc_aic_c(ll=null_ll, n_param=ku.NULL_MODEL_PARAMS,
+                                         num_obs=sum(data.values()))
+            else:
+                alt_aic = ku.calc_aic(ll=alt_ll, n_param=self.alt_model_params)
+                null_aic = ku.calc_aic(ll=null_ll, n_param=ku.NULL_MODEL_PARAMS)
+            self._alt_aic = alt_aic
+            self._null_aic = null_aic
+            self.dAIC = null_aic - alt_aic
 
             # caring, sharing, every little thing that we are wearing
             for sister in self._sisters:

@@ -20,7 +20,7 @@ from RepeatKmer.RepeatKmer.kmer_node import KmerNode
 
 class KmerTree:
     def __init__(self, root_k, genome_file, should_count=True, dseg_threshold=0.8,
-                 out_prefix="out_kmer", logger=None, debug=False):
+                 out_prefix="out_kmer", logger=None, debug=False, correct_aic=True):
         '''A tree structure to hold K-mers and their interrelationships.
 
         Args:
@@ -48,6 +48,7 @@ class KmerTree:
         self._to_dfs = None
         self.kmer_result_table = None
         self.debug = debug
+        self.correct_aic = correct_aic
 
         if logger is None:
             self.logger = logging.getLogger()
@@ -107,10 +108,11 @@ class KmerTree:
 
         if self._leaf_kmers is None:
             root_node = KmerNode(seq="root", parent=None, genome=self.genome, tree=self,
-                                 should_count=False, root_k=self.root_k)
+                                 should_count=False, root_k=self.root_k,
+                                 correct_aic=self.correct_aic)
             new_leaves = [KmerNode(seq=nt, parent=root_node, genome=self.genome, tree=self,
                                    should_count=self.should_count, nt_model=self.nt_freqs,
-                                   root_k=self.root_k)
+                                   root_k=self.root_k, correct_aic=self.correct_aic)
                           for nt in ku.NTS]
         else:
             # if a model is set, use that.
@@ -121,7 +123,8 @@ class KmerTree:
                     new_leaf = KmerNode(seq=kmer.seq + nt, parent=kmer,
                                         genome=self.genome, tree=self,
                                         should_count=self.should_count,
-                                        nt_model=nt_model, root_k=self.root_k)
+                                        nt_model=nt_model, root_k=self.root_k,
+                                        correct_aic=self.correct_aic)
                     new_leaves.append(new_leaf)
 
         self.leaf_length = new_leaves[0].length
