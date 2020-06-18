@@ -24,12 +24,13 @@ class Benchmark:
         self.count_of_others = count_of_others
         self.results = dict()
         self.count_of_obs = np.arange(0, self.max_count, self.step_num)
-        self.count_of_obs[0] = 1
+        self.count_of_obs[0] = 0
         self.null_model = null_model
 
     def run_expt(self, count_of_others, corrected=True):
         '''Run through the simulation to estimate power for one set of conditions.'''
         results = list()
+        print("output table header:\n", "focal_observed", "method", "dAIC", "total_others")
         for i in self.count_of_obs:
             data = {
                 "A": count_of_others / 3,
@@ -38,6 +39,9 @@ class Benchmark:
                 "T": count_of_others / 3
             }
             total = sum(data.values())
+            if total == 0:
+                results.append(np.nan)
+                continue
 
             alt_model = {nt: data[nt] / total for nt in data}
             alt_ll = ku.log_likelihood(data=data, model=alt_model)
@@ -51,6 +55,7 @@ class Benchmark:
                 alt = ku.calc_aic(ll=alt_ll, n_param=ku.ALT_MODEL_PARAMS)
                 null = ku.calc_aic(ll=null_ll, n_param=ku.NULL_MODEL_PARAMS)
             results.append(null - alt)
+            print(i, "AICc" if corrected else "AIC", null-alt, count_of_others)
         return results
 
     def run_analysis(self, other_counts=None, corrected=True):
