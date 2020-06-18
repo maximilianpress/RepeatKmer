@@ -10,8 +10,8 @@ find overrepresented (repetitive) sequences in a genome.
 
 """
 from __future__ import print_function
-import RepeatKmer.RepeatKmer.kmer_utils as ku
-from RepeatKmer.RepeatKmer.kmer_tree import KmerTree
+import RepeatKmer.kmer_utils as ku
+from RepeatKmer.kmer_tree import KmerTree
 
 def main():
     c_args = ku.parse_args()

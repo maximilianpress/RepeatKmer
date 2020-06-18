@@ -15,7 +15,7 @@ import numpy as np
 import fuzzywuzzy as fuzz
 from Bio import SeqIO
 from copy import deepcopy
-import RepeatKmer.RepeatKmer.kmer_utils as ku
+import RepeatKmer.kmer_utils as ku
 
 class KmerNode:
     '''An object to form a locus of analysis for a single k-mer. Links to other k-mers
@@ -156,12 +156,16 @@ class KmerNode:
             self.sister_counts.update({sister.terminal_nt: sister.count for sister in self._sisters})
             # avoid divide by zero
             if self.parent.count == 0:
-                self.parent.count += 1
-            observed = self.count / self.parent.count
+                self.parent.count += 1  # in the case of the root
+
+            # this is NON-IDENTICAL to count of parents!! parents can terminate a contig!!
+            total_sibling_count = self.count + sum(self.sister_counts.values())
+
+            observed = self.count / total_sibling_count
             self.obs_exp_ratio = observed / \
                                     (self.nt_model[self.terminal_nt] + self.freq_pseudocount)
 
-            self.alt_model = {sister.terminal_nt: (sister.count / self.parent.count) for sister in self._sisters}
+            self.alt_model = {sister.terminal_nt: (sister.count / total_sibling_count) for sister in self._sisters}
             self.alt_model[self.terminal_nt] = observed
 
             for nt in self.nt_model:
