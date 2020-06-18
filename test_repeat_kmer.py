@@ -11,11 +11,11 @@ maximilianpress
 from __future__ import print_function
 import unittest
 import math
-import RepeatKmer.RepeatKmer.repeat_kmer as rk
+#import RepeatKmer.RepeatKmer.repeat_kmer as rk
 #from RepeatKmer.RepeatKmer.repeat_kmer import KmerError
-import RepeatKmer.RepeatKmer.kmer_utils as ku
-from RepeatKmer.RepeatKmer.kmer_tree import KmerTree
-from RepeatKmer.RepeatKmer.kmer_node import KmerNode
+import RepeatKmer.kmer_utils as ku
+from RepeatKmer.kmer_tree import KmerTree
+from RepeatKmer.kmer_node import KmerNode
 
 
 SEQ_FILE = "test_collateral/test_genome.fa"
@@ -115,12 +115,13 @@ class RepKmerTestCase(unittest.TestCase):
         with self.assertRaises(KeyError):
             ku.log_likelihood_ratio(data=data, num_model=model, denom_model=model3)
 
-    def test_calc_aic_c(self):
+    def test_calc_aic(self):
         '''Test numerical computation of AICc'''
         aic_c = ku.calc_aic_c(ll=-10, n_param=1, num_obs=10)
-        aic = 22
-        full = aic + ((2*1^2 + 2*1) / (10-1-1))
-        self.assertEqual(aic_c, full)
+        aic = ku.calc_aic(ll=-10, n_param=1)
+        self.assertEqual(aic, 22)
+        corrected = aic + ((2*1^2 + 2*1) / (10-1-1))
+        self.assertEqual(aic_c, corrected)
 
     def test_kmer_pruning(self):
         '''ensure that k-mers are properly pruned'''
@@ -179,7 +180,7 @@ class RepKmerTestCase(unittest.TestCase):
         }
 
         self.assertAlmostEqual(kmer.nt_model["C"], 0.17105263157894737)
-        self.assertAlmostEqual(kmer.alt_model["C"], 0.32)
+        self.assertAlmostEqual(kmer.alt_model["C"], 0.3913043, places=5)
         alt_aic = ku.calc_aic_c(ku.log_likelihood(data=data, model=kmer.alt_model),
                                 n_param=7, num_obs=sum(data.values()))
         null_aic = ku.calc_aic_c(ku.log_likelihood(data=data, model=kmer.nt_model),

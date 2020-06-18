@@ -15,8 +15,8 @@ import numpy as np
 import fuzzywuzzy as fuzz
 from Bio import SeqIO
 from copy import deepcopy
-import RepeatKmer.RepeatKmer.kmer_utils as ku
-from RepeatKmer.RepeatKmer.kmer_node import KmerNode
+import RepeatKmer.kmer_utils as ku
+from RepeatKmer.kmer_node import KmerNode
 
 class KmerTree:
     def __init__(self, root_k, genome_file, should_count=True, dseg_threshold=0.8,
@@ -46,6 +46,7 @@ class KmerTree:
         self.model = None
         self._maximal_kmers = None
         self._to_dfs = None
+        self._genome_nt_counts = None
         self.kmer_result_table = None
         self.debug = debug
         self.correct_aic = correct_aic
@@ -206,6 +207,7 @@ class KmerTree:
 
         # also count nucleotide frequencies to initialize tree models
         all_nts_counted = float(sum([nt_counts[nt] for nt in ku.NTS]))
+        self._genome_nt_counts = nt_counts
         self.nt_freqs = {nt: nt_counts[nt] / all_nts_counted for nt in ku.NTS}
 
     def yield_all_kmer_seqs(self):
