@@ -26,7 +26,7 @@ cd RepeatKmer
 conda env create -n repeat_kmer -f env.yml
 
 ### if you prefer pip
-pip3 install -r requirements.txt
+pip3 install --user -r requirements.txt
 
 
 ### run tests
