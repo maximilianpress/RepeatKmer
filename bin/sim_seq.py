@@ -1,20 +1,58 @@
-#/usr/bin/env python3
-import sys
-from random import sample
-NTS = [
-    "A",
-    "C",
-    "G",
-    "T"
-]
+#!/usr/bin/env python3
+"""
+To simulate sequences according to some generative model.
+"""
+from numpy.random import choice
+import RepeatKmer.kmer_utils as ku
 
-def sim_seq(seq_length):
-    seq = ""
-    while len(seq) < seq_length:
-        seq += sim_nt()[0]
-    print(seq)
+DEFAULT_MODEL = ku.UNIFORM_NT_MODEL
+DEFAULT_LENGTH = 1e8  # length of overall sequence
+SEED = 666
 
-def sim_nt():
-    return sample(NTS, 1)
+class SeqGenerator(object):
+    def __init__(self, freqs=None, root_k=None, genome_model=None, kmer_model=None,
+                 seed=SEED):
+        self.seq = str()
+        self.root_k = root_k
+        self.genome_model = genome_model
+        self.freqs = freqs if freqs is not None else DEFAULT_MODEL
+        self.model = None
+        self.kmer_model = None
 
-sim_seq(int(sys.argv[1]))
+    def read_model(self):
+        if self.kmer_model is None:
+            raise IOError("did not supply k-mer models!")
+        raise NotImplementedError("need to implement reading k-mer models!")
+
+    def get_local_models(self):
+        '''define the local models based on the root k-mer sequences (if needed)'''
+        total = float(sum(self.model.values()))
+        for kmer in self.freqs:
+            if len(kmer) != (self.root_k + 1):
+                raise ku.KmerError("Kmer {} is of wrong length! Should be {}.".format(
+                    kmer, self.root_k
+                ))
+            stem = kmer[0:-2]
+            for suffix in ku.NTS:
+                
+                #self.model[kmer] /= total
+
+        pass
+
+    def sample_nt(self):
+        '''Use the generative model to sample a nt'''
+        pass
+
+    def make_seq(self):
+        pass
+
+    def estimate_model(self):
+        try:
+            from RepeatKmer.kmer_tree import KmerTree
+        except ImportError as e:
+            raise e
+        tree = KmerTree(root_k=self.root_k, genome_file=genome_model)
+
+    def write_seq(self):
+        pass
+
