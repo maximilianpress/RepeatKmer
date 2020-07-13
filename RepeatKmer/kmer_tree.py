@@ -20,7 +20,7 @@ from RepeatKmer.kmer_node import KmerNode
 
 class KmerTree:
     def __init__(self, root_k, genome_file, should_count=True, dseg_threshold=0.8,
-                 out_prefix="out_kmer", logger=None, debug=False, correct_aic=True):
+                 out_prefix="out_kmer", logger=None, debug=False, correct_aic=False):
         '''A tree structure to hold K-mers and their interrelationships.
 
         Args:

@@ -10,7 +10,8 @@ from RepeatKmer.kmer_tree import KmerTree
 def main():
     fa_file = sys.argv[1]
     prefix = sys.argv[2]
-    tree = KmerTree(genome_file=fa_file, root_k=2)
+    root_k = sys.argv[3]
+    tree = KmerTree(genome_file=fa_file, root_k=3)
     tree.make_genome_seq()
     tree._initialize_kmers()
     counts = dict()
