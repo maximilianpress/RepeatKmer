@@ -23,7 +23,8 @@ git clone https://github.com/maximilianpress/RepeatKmer.git
 cd RepeatKmer
 
 ### if you use conda
-conda env create -n repeat_kmer -f env.yml
+conda env create -f env.yml
+conda activate repeat_kmer
 
 ### if you prefer pip
 pip3 install --user -r requirements.txt
