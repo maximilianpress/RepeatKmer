@@ -43,7 +43,8 @@ class SeqGenerator(object):
         '''Use the generative model to sample a nt'''
         pass
 
-    def make_seq(self):
+    def make_seq(self, length):
+        '''Use a model to generate a sequence (single contig) of length "length".'''
         pass
 
     def estimate_model(self):
@@ -52,6 +53,8 @@ class SeqGenerator(object):
         except ImportError as e:
             raise e
         tree = KmerTree(root_k=self.root_k, genome_file=genome_model)
+        tree.inialize_kmers()
+        tree._generate_models_from_stem()
 
     def write_seq(self):
         pass
