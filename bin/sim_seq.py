@@ -2,7 +2,8 @@
 """
 To simulate sequences according to some generative model.
 """
-from numpy.random import choice
+from random import choices
+#from numpy.random import choice
 import RepeatKmer.kmer_utils as ku
 
 DEFAULT_MODEL = ku.UNIFORM_NT_MODEL
@@ -39,12 +40,18 @@ class SeqGenerator(object):
 
         pass
 
-    def sample_nt(self):
-        '''Use the generative model to sample a nt'''
-        pass
+    def sample_nts(self, model, length):
+        '''Use a simple model to sample a seq of a certain length (modulo keys)'''
+        nts = []
+        probs = []
+        for nt, prob in model:
+            nts.append(nt)
+            probs.append(prob)
+        return "".join(choices(population=nts, weights=probs, k=length))
 
     def make_seq(self, length):
         '''Use a model to generate a sequence (single contig) of length "length".'''
+        
         pass
 
     def estimate_model(self):
