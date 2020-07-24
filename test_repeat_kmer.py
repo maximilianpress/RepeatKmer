@@ -19,7 +19,7 @@ from RepeatKmer.kmer_node import KmerNode
 
 
 SEQ_FILE = "test_collateral/test_genome.fa"
-REP_SEQ_FILE = "test_collateral/test_genome_repeat.fa"
+REP_SEQ_FILE = "test_collateral/test_sim_seq.fa"
 
 class RepKmerTestCase(unittest.TestCase):
     def setUp(self):
@@ -213,13 +213,15 @@ class RepKmerTestCase(unittest.TestCase):
         '''Test D-segment heuristic for maximal repeats'''
         self.Tree = KmerTree(genome_file=REP_SEQ_FILE, root_k=1, debug=True)
         self.Tree.make_genome_seq()
-        self.assertEqual(self.Tree._genome_length, 331)
+        self.assertEqual(self.Tree._genome_length, 100000 + 96*6)
         self.Tree._initialize_kmers()
         self.Tree._generate_models_from_stem()
         self.Tree.grow_the_tree()
         self.Tree.select_maximal_repeats()
+        self.assertIn(self.Tree.access_kmer("ATGTTG"),
+                      self.Tree._maximal_kmers)
         self.assertIn(self.Tree.access_kmer("CAACAT"),
                       self.Tree._maximal_kmers)
-        self.assertNotIn(self.Tree.access_kmer("CAACA"),
+        self.assertNotIn(self.Tree.access_kmer("ATGTT"),
                          self.Tree._maximal_kmers)
 
