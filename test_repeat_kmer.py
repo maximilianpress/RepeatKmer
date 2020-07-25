@@ -20,6 +20,7 @@ from RepeatKmer.kmer_node import KmerNode
 
 SEQ_FILE = "test_collateral/test_genome.fa"
 REP_SEQ_FILE = "test_collateral/test_sim_seq.fa"
+ACAC_SEQ_FILE = "test_collateral/test_seq_acac.fasta"
 
 class RepKmerTestCase(unittest.TestCase):
     def setUp(self):
@@ -132,8 +133,8 @@ class RepKmerTestCase(unittest.TestCase):
         self.assertTrue(kmer.should_prune)
 
     def test_kmer_aic(self):
-        '''ensure that AICc of k-mer families is estimated accurately.'''
-        self.Tree.root_k = 1
+        '''ensure that AICc/AIC of k-mer families is estimated accurately.'''
+        self.Tree = KmerTree(genome_file=ACAC_SEQ_FILE, root_k=1, debug=True)
         self.Tree._initialize_kmers()
         self.Tree.grow_the_tree()
         kmer = self.Tree.access_kmer("ACAC")
@@ -211,9 +212,10 @@ class RepKmerTestCase(unittest.TestCase):
     #@unittest.expectedFailure
     def test_d_segment_finder(self):
         '''Test D-segment heuristic for maximal repeats'''
-        self.Tree = KmerTree(genome_file=REP_SEQ_FILE, root_k=1, debug=True)
+        # flip debug switch to get way too much information regarding leaves
+        self.Tree = KmerTree(genome_file=REP_SEQ_FILE, root_k=1, debug=False)
         self.Tree.make_genome_seq()
-        self.assertEqual(self.Tree._genome_length, 100000 + 96*6)
+        self.assertEqual(self.Tree._genome_length, 100000 + 96*12)
         self.Tree._initialize_kmers()
         self.Tree._generate_models_from_stem()
         self.Tree.grow_the_tree()

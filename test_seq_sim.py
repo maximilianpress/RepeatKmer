@@ -34,3 +34,8 @@ class SimSeqTestCase(unittest.TestCase):
                }
         self.sg.sample_nts(model=model)
         self.assertEqual("A" * self.sg.length, self.sg.seq)
+
+    def test_append_seq(self):
+        self.sg.sample_nts()
+        self.sg.insert_seq(append_seq="a_seq")
+        self.assertTrue(self.sg.seq.endswith("a_seq"))
