@@ -82,6 +82,10 @@ class SeqGenerator(object):
             probs.append(model[nt])
         self.seq += "".join(choices(population=nts, weights=probs, k=self.length))
 
+    def insert_seq(self, append_seq):
+        '''Append an arbitrary string onto self.seq'''
+        self.seq += append_seq
+
     def make_seq_from_seq(self):
         '''Use a model to generate a sequence (single contig) of length "length".'''
         self.estimate_model_from_seq()
