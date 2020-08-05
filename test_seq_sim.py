@@ -39,3 +39,5 @@ class SimSeqTestCase(unittest.TestCase):
         self.sg.sample_nts()
         self.sg.insert_seq(append_seq="a_seq")
         self.assertTrue(self.sg.seq.endswith("a_seq"))
+
+

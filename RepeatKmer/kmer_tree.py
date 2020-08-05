@@ -73,6 +73,13 @@ class KmerTree:
         if self.root_k == 1:
             self.logger.info("Using simple nucleotide frequencies for all models.")
             self.model = self.nt_freqs
+            # why does this screw things up?
+            #self.model["A"] = (self.model["A"] + self.model["T"]) / sum(self.model.values())
+            #self.model["T"] = (self.model["A"] + self.model["T"]) / sum(self.model.values())
+            #self.model["G"] = (self.model["G"] + self.model["C"]) / sum(self.model.values())
+            #self.model["C"] = (self.model["G"] + self.model["C"]) / sum(self.model.values())
+
+
         else:
             self.logger.info("Generating k-mer frequency models.")
             self.model = {}
@@ -282,7 +289,7 @@ class KmerTree:
             self._to_dfs.extend([child for child in kmer.children])
 
         if kmer.segment_score() < self.dseg_threshold and kmer.parent not in self._maximal_kmers:
-            self._maximal_kmers.append(kmer.parent)
+            return True
 
 
     def yield_maximal_repeats(self):
@@ -298,13 +305,42 @@ class KmerTree:
         # try to use D-segments (e.g. phil green) as heuristic, only _relative_ to counts of
         # path-initiating (or -breaking) k-mers.
         # store each such notable kmer in an appropriate structure.
+        maximals = list()
         self._maximal_kmers = list()
         self._to_dfs = [self.access_kmer(nt) for nt in ku.NTS]
         # easier to just DFS the tree once?
         while len(self._to_dfs) > 0:
             for kmer_node in self._to_dfs:
-                self._changepoint_calc(kmer_node)
+                if self._changepoint_calc(kmer_node):
+                    maximals.append(kmer_node.parent)
                 self._to_dfs.remove(kmer_node)
+
+        for maximal in maximals:
+            rc = ku.rev_comp(maximal.seq)
+            if rc in self.all_kmers[len(rc)]:
+                reverse_kmer = self.access_kmer(rc)
+                if reverse_kmer in self._maximal_kmers:
+                    to_keep = self._decide_between_kmers(maximal, reverse_kmer)
+                else:
+                    to_keep = [maximal]
+                self._maximal_kmers.extend(to_keep)
+
+    def _decide_between_kmers(self, kmer1, kmer2):
+        '''Decide between two (presumably equivalent via e.g. RC) k-mers in terms
+        of frequency, possibly other criteria
+        '''
+        if kmer1 in self._maximal_kmers or kmer2 in self._maximal_kmers:
+            # decision already made
+            to_keep = list()
+        elif kmer1.count > kmer2.count:
+            to_keep = [kmer1]
+        elif kmer2.count > kmer1.count:
+            to_keep = [kmer2]
+        elif kmer1.count == kmer2.count:
+            to_keep = [kmer1, kmer2]
+        else:
+            raise ValueError("logical impossibility!!!")
+        return to_keep
 
     def _infer_kmer_relationships(self):
         '''Infer which k-mers have (fuzzy) substring/superstring relationships.

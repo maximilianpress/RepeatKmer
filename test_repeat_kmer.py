@@ -135,6 +135,7 @@ class RepKmerTestCase(unittest.TestCase):
     def test_kmer_aic(self):
         '''ensure that AICc/AIC of k-mer families is estimated accurately.'''
         self.Tree = KmerTree(genome_file=ACAC_SEQ_FILE, root_k=1, debug=True)
+        self.Tree.make_genome_seq()
         self.Tree._initialize_kmers()
         self.Tree.grow_the_tree()
         kmer = self.Tree.access_kmer("ACAC")
@@ -227,3 +228,5 @@ class RepKmerTestCase(unittest.TestCase):
         self.assertNotIn(self.Tree.access_kmer("ATGTT"),
                          self.Tree._maximal_kmers)
 
+    def test_decide_between_kmers(self):
+        self.assertTrue(False)
