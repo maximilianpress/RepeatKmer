@@ -52,9 +52,11 @@ class KmerTree:
         self.correct_aic = correct_aic
 
         if logger is None:
-            self.logger = logging.getLogger()
+            self.logger = logging.getLogger("KmerTree")
         else:
             self.logger = logger
+
+
 
     def _initialize_kmers(self):
         '''Build the initial k-mer tree up to the point specified by root_k
@@ -199,6 +201,7 @@ class KmerTree:
                         self.genome.append(seq)
                         self.genome.append(rc_seq)
                         total_length += len(seq)
+                        self.logger.info(total_length)
                         seq = ''
                 else:
                     seq += line.strip()
@@ -353,4 +356,35 @@ class KmerTree:
 
     def write_results(self):
         '''Write maximal results to disk.'''
-        pass
+        header = ["id",
+                  "count",
+                  "length",
+                  "parent_proportion",
+                  "obs_exp_ratio",
+                  "dAIC",
+                  "stem_length",
+                  "is_terminal",
+                  "sequence",
+                  "reverse_complement",
+                  "substring_kmer",
+                  ]
+        with open(self.out_prefix + "_maximal_kmers.tsv", "w") as outfile:
+            outfile.write("\t".join(header) + "\n")
+            i = 0
+            for kmer in self._maximal_kmers:
+                line = "\t".join(
+                    [str(i),
+                     str(kmer.count),
+                     str(len(kmer.seq)),
+                     str(kmer.alt_model[kmer.terminal_nt]),
+                     str(kmer.obs_exp_ratio),
+                     str(kmer.dAIC),
+                     str(kmer.root_k),
+                     "False" if any([child in self._maximal_kmers for child in kmer.children]) else "True",
+                     kmer.seq,
+                     ku.rev_comp(kmer.seq),
+                     "None"
+                     ]
+                )
+                outfile.write(line)
+                i += 1
