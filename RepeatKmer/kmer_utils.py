@@ -127,5 +127,5 @@ def parse_args():
                         help='A (probably haploid genome) sequence file, FASTA format.')
     parser.add_argument('--root_k', '-k', required=False, type=int, default=8,
                         help="k-mer length of fully enumerated k-mers. (Default: %default)")
-    args = argparse.parse_args()
-    return args
+    args = parser.parse_args()
+    return vars(args)
