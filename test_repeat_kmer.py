@@ -228,5 +228,8 @@ class RepKmerTestCase(unittest.TestCase):
         self.assertNotIn(self.Tree.access_kmer("ATGTT"),
                          self.Tree._maximal_kmers)
 
-    def test_decide_between_kmers(self):
+    def test_decide_among_kmers(self):
+        self.assertTrue(False)
+
+    def test_write_results(self):
         self.assertTrue(False)
