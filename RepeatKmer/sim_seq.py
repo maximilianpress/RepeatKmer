@@ -82,6 +82,26 @@ class SeqGenerator(object):
             probs.append(model[nt])
         self.seq += "".join(choices(population=nts, weights=probs, k=self.length))
 
+    def sample_kmers(self, model=None):
+        '''
+
+        :return:
+        '''
+        # initialize
+        kmers = []
+        probs = []
+        self.seq = choices(population=kmers, weights=probs, k=1)
+        while len(self.seq) < self.length:
+            stem_seq = self.seq[(len(self.seq) - (self.root_k + 1)): -1]
+            sub_model = model[stem_seq]
+            nts = []
+            probs = []
+            for nt in sub_model:
+                nt.append(nt)
+                probs.append(sub_model[nt])
+
+            self.seq += choices(population=nts, weights=probs, k=1)
+
     def insert_seq(self, append_seq):
         '''Append an arbitrary string onto self.seq'''
         self.seq += append_seq
@@ -90,11 +110,10 @@ class SeqGenerator(object):
         '''Use a model to generate a sequence (single contig) of length "length".'''
         self.estimate_model_from_seq()
         self.make_seq_from_model()
-        pass
 
     def make_seq_from_model(self):
         self.sample_nts()
-        pass
+        # next step...
 
     def read_in_numeric_model(self):
         pass
