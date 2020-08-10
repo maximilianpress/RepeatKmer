@@ -111,6 +111,17 @@ def rev_comp(seq):
     '''
     return seq.translate(TAB)[::-1]
 
+def setup_logger(name="RepeatKmer"):
+    '''Set up a logger.
+
+    Returns:
+        logging.Logger: a logger.
+
+    '''
+    logging.basicConfig(format="[%(name)s - %(asctime)s] %(message)s", level=logging.INFO)
+    logger = logging.getLogger(name)
+    return logger
+
 
 def parse_args():
     '''Parse CLI arguments
@@ -119,13 +130,13 @@ def parse_args():
         dict: CLI arguments
     '''
 
-    parser = argparse.ArgumentParser(description='Parse arguments for k-mer tree genome'
-                                                 'analysis.')
+    parser = argparse.ArgumentParser(description='Parse arguments for k-mer tree genomic'
+                                                 ' repeat analysis.')
     parser.add_argument('--out_file_prefix', '-o', required=True, type=str,
                         default='kmer_out', help='prefix of output files')
     parser.add_argument('--genome_file', '-g', required=True, type=str,
                         help='A (probably haploid genome) sequence file, FASTA format.')
-    parser.add_argument('--root_k', '-k', required=False, type=int, default=8,
+    parser.add_argument('--root_k', '-k', required=False, type=int, default=4,
                         help="k-mer length of fully enumerated k-mers. (Default: %default)")
     args = parser.parse_args()
     return vars(args)

@@ -52,7 +52,7 @@ class KmerTree:
         self.correct_aic = correct_aic
 
         if logger is None:
-            self.logger = logging.getLogger("KmerTree")
+            self.logger = ku.setup_logger()
         else:
             self.logger = logger
 
@@ -63,7 +63,7 @@ class KmerTree:
         '''
         while self.leaf_length < self.root_k:
             self._grow_leaf_kmers()  # increments self.leaf_length
-            self.logger.info("Grew k-mers of length {}".format(self.leaf_length))
+            self.logger.info("Initialized k-mers of length {}".format(self.leaf_length))
             self.analyze_leaves(model_calc=False)
 
     def _generate_models_from_stem(self):
@@ -112,7 +112,7 @@ class KmerTree:
     def _grow_leaf_kmers(self):
         '''propagate all leaf k-mers forward by adding single nucleotides.
         '''
-        self.logger.info("Growing k-mers of length {0}, from {1} current leaves".format(
+        self.logger.info("Growing from k-mers of length {0}, represented by {1} current leaves".format(
             self.leaf_length,
             len(self._leaf_kmers) if self.leaf_length else 0))
 
@@ -201,7 +201,7 @@ class KmerTree:
                         self.genome.append(seq)
                         self.genome.append(rc_seq)
                         total_length += len(seq)
-                        self.logger.info(total_length)
+                        #self.logger.info(total_length)
                         seq = ''
                 else:
                     seq += line.strip()
