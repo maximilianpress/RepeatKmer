@@ -156,7 +156,7 @@ class KmerTree:
         end_leaves = len(self._leaf_kmers)
         self.logger.info("Started with {} leaf k-mers, pruned {} failing AIC test,"
                          "retained {} after pruning.".format(
-                             start_leaves, (end_leaves - start_leaves), end_leaves)
+                             start_leaves, (start_leaves - end_leaves), end_leaves)
                          )
 
     def analyze_leaves(self, model_calc=True):
@@ -286,7 +286,7 @@ class KmerTree:
         :return:
         '''
         if kmer.should_prune:
-            self.logger.info("Explored past a tip of length {}, breaking DFS".format(kmer.length - 1))
+            #self.logger.info("Explored past a tip of length {}, breaking DFS".format(kmer.length - 1))
             return None
         else:
             self._to_dfs.extend([child for child in kmer.children])
@@ -326,7 +326,7 @@ class KmerTree:
                     to_keep = self._decide_between_kmers(maximal, reverse_kmer)
                 else:
                     to_keep = [maximal]
-                self._maximal_kmers.extend(to_keep)
+                self._maximal_kmers = to_keep
 
     def _decide_between_kmers(self, kmer1, kmer2):
         '''Decide between two (presumably equivalent via e.g. RC) k-mers in terms
@@ -372,6 +372,12 @@ class KmerTree:
             outfile.write("\t".join(header) + "\n")
             i = 0
             for kmer in self._maximal_kmers:
+                if len(kmer.seq) == 1:
+                    continue
+                if not kmer.inferred_model:
+                    kmer.populate_sisters()
+                if kmer.alt_model is None:
+                    print(kmer.inferred_model, kmer.seq, kmer.sister_counts, kmer.count)
                 line = "\t".join(
                     [str(i),
                      str(kmer.count),

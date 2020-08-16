@@ -143,7 +143,7 @@ class KmerNode:
         # never had to have a chaperon, no sir
         if self.sister_counts:
             if not self.alt_model:
-                raise ValueError("balls")
+                raise ValueError("No alt model specified for kmer {}!".format(self.seq))
             pass
         elif self.parent.seq == "root":
             pass
