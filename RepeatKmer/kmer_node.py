@@ -10,6 +10,7 @@ KmerNode class models a k-mer in the tree.
 from __future__ import print_function
 import argparse
 import logging
+import re
 import pandas as pd
 import numpy as np
 import fuzzywuzzy as fuzz
@@ -78,6 +79,7 @@ class KmerNode:
         self.changepoint_thresh = changepoint_thresh
         self.correct_aic = correct_aic
 
+
         if self.parent is not None:
             self.parent.children.append(self)
 
@@ -103,11 +105,12 @@ class KmerNode:
     def _count_occurrences(self):
         '''Count occurrences of a k-mer in a genome sequence.
         '''
+        self._re_pat = re.compile(self.seq)
         if self.genome is None:
             raise ValueError("No genome passed in which to count k-mer occurrences!")
         self.count = 0
-        for tig in self.genome:
-            self.count += tig.count(self.seq)
+        #for tig in self.genome:
+        self.count += len(re.findall(self._re_pat, self.genome))
 
     def estimate_daic(self):
         '''Estimate dAICc for the k-mer and its sisters relative to some model'''
