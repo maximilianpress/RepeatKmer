@@ -50,6 +50,7 @@ class KmerTree:
         self.kmer_result_table = None
         self.debug = debug
         self.correct_aic = correct_aic
+        self._search_string = None
 
         if logger is None:
             self.logger = ku.setup_logger()
@@ -117,10 +118,10 @@ class KmerTree:
             len(self._leaf_kmers) if self.leaf_length else 0))
 
         if self._leaf_kmers is None:
-            root_node = KmerNode(seq="root", parent=None, genome=self.genome, tree=self,
+            root_node = KmerNode(seq="root", parent=None, genome=self._search_string, tree=self,
                                  should_count=False, root_k=self.root_k,
                                  correct_aic=self.correct_aic)
-            new_leaves = [KmerNode(seq=nt, parent=root_node, genome=self.genome, tree=self,
+            new_leaves = [KmerNode(seq=nt, parent=root_node, genome=self._search_string, tree=self,
                                    should_count=self.should_count, nt_model=self.nt_freqs,
                                    root_k=self.root_k, correct_aic=self.correct_aic)
                           for nt in ku.NTS]
@@ -131,7 +132,7 @@ class KmerTree:
                 nt_model = self._yield_model_for_kmer(kmer)  # is self.nt_freqs if not populated
                 for nt in ku.NTS:
                     new_leaf = KmerNode(seq=kmer.seq + nt, parent=kmer,
-                                        genome=self.genome, tree=self,
+                                        genome=self._search_string, tree=self,
                                         should_count=self.should_count,
                                         nt_model=nt_model, root_k=self.root_k,
                                         correct_aic=self.correct_aic)
@@ -214,6 +215,8 @@ class KmerTree:
         ))
         self._longest_seq = longest_seq
         self._genome_length = total_length
+        self._search_string = "|".join(self.genome)
+
 
         # also count nucleotide frequencies to initialize tree models
         all_nts_counted = float(sum([nt_counts[nt] for nt in ku.NTS]))
@@ -326,7 +329,7 @@ class KmerTree:
                     to_keep = self._decide_between_kmers(maximal, reverse_kmer)
                 else:
                     to_keep = [maximal]
-                self._maximal_kmers = to_keep
+                self._maximal_kmers.extend(to_keep)
 
     def _decide_between_kmers(self, kmer1, kmer2):
         '''Decide between two (presumably equivalent via e.g. RC) k-mers in terms
@@ -392,5 +395,5 @@ class KmerTree:
                      "None"
                      ]
                 )
-                outfile.write(line)
+                outfile.write(line + "\n")
                 i += 1
