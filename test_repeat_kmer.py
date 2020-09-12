@@ -68,17 +68,15 @@ class RepKmerTestCase(unittest.TestCase):
 
     def test_count_kmers(self):
         '''Ensure that the nucleotide counts themselves are correct.'''
-        self.Tree._initialize_kmers()
-        self.assertEqual(self.Tree.access_kmer("G").count, 13)
-        self.assertEqual(self.Tree.access_kmer("A").count, 25)
-        self.assertEqual(self.Tree.access_kmer("T").count, 25)
-        self.assertEqual(self.Tree.access_kmer("C").count, 13)
-
         self.Tree.root_k = 8
         self.Tree._initialize_kmers()
         self.assertEqual(self.Tree.access_kmer("ACACACAC").count, 1)
         self.assertEqual(self.Tree.access_kmer("GGGGGGGG").count, 0)
         self.assertEqual(self.Tree.access_kmer("TCACTTTT").count, 1)
+        self.assertEqual(self.Tree.access_kmer("G").count, 13)
+        self.assertEqual(self.Tree.access_kmer("A").count, 25)
+        self.assertEqual(self.Tree.access_kmer("T").count, 25)
+        self.assertEqual(self.Tree.access_kmer("C").count, 13)
 
     def test_count_fails_wo_genome(self):
         nocount_tree = self.Tree = KmerTree(genome_file=SEQ_FILE, root_k=1,
@@ -132,16 +130,27 @@ class RepKmerTestCase(unittest.TestCase):
         kmer.decide_if_should_prune_kmer()
         self.assertTrue(kmer.should_prune)
 
+    def test_get_stem_seq(self):
+        kmer = KmerNode(seq="ACAC", root_k=10, parent=None, should_count=False)
+        #self.assertEqual(kmer.seq, "ACAC")
+        #kmer._get_stem_seq()
+        self.assertEqual(kmer.stem_seq, "ACAC")
+        kmer = KmerNode(seq="ACAC", root_k=4, parent=None, should_count=False)
+        self.assertEqual(kmer.stem_seq, "ACA")
+        kmer = KmerNode(seq="ACAC", root_k=1, parent=None, should_count=False)
+        self.assertEqual(kmer.stem_seq, "A")
+        #kmer._get_stem_seq()
+
     def test_kmer_aic(self):
         '''ensure that AICc/AIC of k-mer families is estimated accurately.'''
         self.Tree = KmerTree(genome_file=ACAC_SEQ_FILE, root_k=1, debug=True)
         self.Tree.make_genome_seq()
         self.Tree._initialize_kmers()
         self.Tree.grow_the_tree()
-        kmer = self.Tree.access_kmer("ACAC")
+        kmer = self.Tree.access_kmer("CACA")
         sisters = kmer._sisters
         # this stem seq defines models PASSED TO CHILDREN (not self)
-        self.assertEqual(kmer.stem_seq, "ACA")
+        self.assertEqual(kmer.stem_seq, "CAC")
         self.assertEqual(kmer.dAIC, sisters[0].dAIC)
         self.assertEqual(sisters[0].dAIC, sisters[1].dAIC)
 
@@ -153,10 +162,10 @@ class RepKmerTestCase(unittest.TestCase):
         self.Tree.grow_the_tree()
         kmer = self.Tree.access_kmer("ACACACTAT")
         true_model = {
-            "C": 1.0,
+            "T": 1.0,
             "A": 0.001,
             "G": 0.001,
-            "T": 0.001
+            "C": 0.001
         }
         model = self.Tree._yield_model_for_kmer(kmer)
         self.assertDictEqual(model, true_model)
@@ -227,6 +236,9 @@ class RepKmerTestCase(unittest.TestCase):
                       self.Tree._maximal_kmers)
         self.assertNotIn(self.Tree.access_kmer("ATGTT"),
                          self.Tree._maximal_kmers)
+
+    def test_segment_score(self):
+        self.assertTrue(False)
 
     def test_decide_among_kmers(self):
         self.assertTrue(False)

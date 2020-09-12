@@ -94,13 +94,19 @@ class KmerNode:
         '''Get the stem of the sequence, as is useful for model conditioning.
         This stem seq defines models PASSED TO CHILDREN (not self)
 
+        Sets: self.stem_seq
         Raises: AssertionError. In case that the stem seq is equal to seq when it should not be.
         '''
+
         if len(self.seq) > (self.root_k - 1):
-            self.stem_seq = self.seq[(1 + len(self.seq) - self.root_k):]
+            # this gives an empty string slice.
+            #self.stem_seq = self.seq[(len(self.seq) - self.root_k) : -1]
+            self.stem_seq = self.seq[(-self.root_k + 1): -1]
             assert self.stem_seq != self.seq
+            #assert self.stem_seq != ""
         else:
             self.stem_seq = self.seq
+
 
     def _count_occurrences(self):
         '''Count occurrences of a k-mer in a genome sequence.
