@@ -286,16 +286,21 @@ class KmerTree:
         *from Phil Green, http://bozeman.mbt.washington.edu/compbio/mbt599/Lecture5.pdf
 
         :param kmer: a KmerNode object, whose children shall be traversed
-        :return:
+        :return: bool: whether the parent is maximal
         '''
+        is_maximal = False
+        # if a k-mer
         if kmer.should_prune:
             #self.logger.info("Explored past a tip of length {}, breaking DFS".format(kmer.length - 1))
-            return None
+            is_maximal = True
         else:
+            if len(kmer.children) == 0:
+                raise ku.KmerError("Kmer {} is unpruned but has no children! Something weird is going on!".format(kmer.seq))
             self._to_dfs.extend([child for child in kmer.children])
 
-        if kmer.segment_score() < self.dseg_threshold and kmer.parent not in self._maximal_kmers:
-            return True
+        if not is_maximal and (kmer.segment_score() < self.dseg_threshold) and (kmer.parent not in self._maximal_kmers):
+            is_maximal = True
+        return is_maximal
 
 
     def yield_maximal_repeats(self):
