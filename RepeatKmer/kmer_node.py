@@ -101,7 +101,7 @@ class KmerNode:
         if len(self.seq) > (self.root_k - 1):
             # this gives an empty string slice.
             #self.stem_seq = self.seq[(len(self.seq) - self.root_k) : -1]
-            self.stem_seq = self.seq[(-self.root_k + 1): -1]
+            self.stem_seq = self.seq[-self.root_k: -1]  # this is the correct slice!
             assert self.stem_seq != self.seq
             #assert self.stem_seq != ""
         else:

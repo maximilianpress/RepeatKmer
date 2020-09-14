@@ -138,12 +138,11 @@ class RepKmerTestCase(unittest.TestCase):
         kmer = KmerNode(seq="ACAC", root_k=4, parent=None, should_count=False)
         self.assertEqual(kmer.stem_seq, "ACA")
         kmer = KmerNode(seq="ACAC", root_k=1, parent=None, should_count=False)
-        self.assertEqual(kmer.stem_seq, "A")
-        #kmer._get_stem_seq()
+        self.assertEqual(kmer.stem_seq, "")
 
     def test_kmer_aic(self):
         '''ensure that AICc/AIC of k-mer families is estimated accurately.'''
-        self.Tree = KmerTree(genome_file=ACAC_SEQ_FILE, root_k=1, debug=True)
+        self.Tree = KmerTree(genome_file=ACAC_SEQ_FILE, root_k=4, debug=True)
         self.Tree.make_genome_seq()
         self.Tree._initialize_kmers()
         self.Tree.grow_the_tree()
