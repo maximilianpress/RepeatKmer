@@ -123,6 +123,23 @@ def setup_logger(name="RepeatKmer"):
     return logger
 
 
+def all_seq_frameshifts(seq):
+    '''Return all frameshifts of an input sequence. Use for k-mer deduplication.
+
+    :param seq : str, the input sequence
+    :return: [str], the set of frameshifts
+    '''
+    tpose = transpose_char(seq)
+    frames = list()
+    while tpose != seq:
+        frames.append(tpose)
+        tpose = transpose_char(tpose)
+    return frames
+
+def transpose_char(seq):
+    '''Move a character from the end of a string to the beginning.'''
+    return seq[-1] + seq[:-1]
+
 def parse_args():
     '''Parse CLI arguments
 
