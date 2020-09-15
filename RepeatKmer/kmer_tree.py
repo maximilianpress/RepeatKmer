@@ -302,7 +302,6 @@ class KmerTree:
             is_maximal = True
         return is_maximal
 
-
     def yield_maximal_repeats(self):
         '''Output full results of greedy tree extension.'''
         pass
@@ -326,6 +325,8 @@ class KmerTree:
                     maximals.append(kmer_node.parent)
                 self._to_dfs.remove(kmer_node)
 
+        # add step to dedupe frameshifts
+
         for maximal in maximals:
             rc = ku.rev_comp(maximal.seq)
             if rc in self.all_kmers[len(rc)]:
@@ -334,6 +335,7 @@ class KmerTree:
                     to_keep = self._decide_between_kmers(maximal, reverse_kmer)
                 else:
                     to_keep = [maximal]
+
                 self._maximal_kmers.extend(to_keep)
 
     def _decide_between_kmers(self, kmer1, kmer2):

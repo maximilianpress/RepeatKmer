@@ -142,7 +142,7 @@ class RepKmerTestCase(unittest.TestCase):
 
     def test_kmer_aic(self):
         '''ensure that AICc/AIC of k-mer families is estimated accurately.'''
-        self.Tree = KmerTree(genome_file=ACAC_SEQ_FILE, root_k=4, debug=True)
+        self.Tree = KmerTree(genome_file=ACAC_SEQ_FILE, root_k=4)
         self.Tree.make_genome_seq()
         self.Tree._initialize_kmers()
         self.Tree.grow_the_tree()
@@ -222,19 +222,17 @@ class RepKmerTestCase(unittest.TestCase):
     def test_d_segment_finder(self):
         '''Test D-segment heuristic for maximal repeats'''
         # flip debug switch to get way too much information regarding leaves
-        self.Tree = KmerTree(genome_file=REP_SEQ_FILE, root_k=1, debug=False)
+        self.Tree = KmerTree(genome_file=REP_SEQ_FILE, root_k=4, debug=True)
         self.Tree.make_genome_seq()
         self.assertEqual(self.Tree._genome_length, 100000 + 96*12)
         self.Tree._initialize_kmers()
         self.Tree._generate_models_from_stem()
         self.Tree.grow_the_tree()
         self.Tree.select_maximal_repeats()
-        self.assertIn(self.Tree.access_kmer("ATGTTG"),
-                      self.Tree._maximal_kmers)
-        self.assertIn(self.Tree.access_kmer("CAACAT"),
-                      self.Tree._maximal_kmers)
-        self.assertNotIn(self.Tree.access_kmer("ATGTT"),
-                         self.Tree._maximal_kmers)
+        kmer_seqs = sorted([kmer.seq for kmer in self.Tree._maximal_kmers])
+
+        self.assertTrue(self.Tree.access_kmer("ACATCA") in self.Tree._maximal_kmers or
+                        self.Tree.access_kmer("TGATGT") in self.Tree._maximal_kmers)
 
     def test_segment_score(self):
         self.assertTrue(False)
@@ -244,3 +242,11 @@ class RepKmerTestCase(unittest.TestCase):
 
     def test_write_results(self):
         self.assertTrue(False)
+
+    def test_all_seq_frameshifts(self):
+        frames = ku.all_seq_frameshifts("ACGT")
+        self.assertEqual(sorted(frames), ["CGTA", "GTAC", "TACG"])
+
+    def test_transpose_char(self):
+        tpose = ku.transpose_char("ACGT")
+        self.assertEqual(tpose, "TACG")
