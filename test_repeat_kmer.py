@@ -235,10 +235,27 @@ class RepKmerTestCase(unittest.TestCase):
                         self.Tree.access_kmer("TGATGT") in self.Tree._maximal_kmers)
 
     def test_segment_score(self):
-        self.assertTrue(False)
+        # 6 children of "AC", of which 2 are T and 4 are A. "AC" occurs 9 times.
+        self.Tree._initialize_kmers()
+        self.Tree.grow_the_tree()
+        child = self.Tree.access_kmer("ACA")
+        self.assertEqual(float(4) / 9, self.Tree.access_kmer("AC").child_proportion(child))
+        self.assertEqual(float(4) / 9, self.Tree.access_kmer("AC").segment_score())
+        #self.assertTrue(False)
 
-    def test_decide_among_kmers(self):
-        self.assertTrue(False)
+    def test_decide_between_kmers(self):
+        self.Tree._initialize_kmers()
+        self.Tree.grow_the_tree()
+        self.Tree._maximal_kmers = ["other", "things"]
+        kmer1 = self.Tree.access_kmer("ACT")
+        kmer2 = self.Tree.access_kmer("ACA")
+        decision = self.Tree._decide_between_kmers(kmer1, kmer2)
+        self.assertTrue(kmer2.count > kmer1.count)
+        self.assertEqual(decision[0].seq, kmer2.seq)  # kmer2 has a higher count
+        self.assertEqual(len(decision), 1)
+        self.Tree._maximal_kmers = [kmer1]
+        decision = self.Tree._decide_between_kmers(kmer1, kmer2)
+        self.assertEqual(len(decision), 0)
 
     def test_write_results(self):
         self.assertTrue(False)
