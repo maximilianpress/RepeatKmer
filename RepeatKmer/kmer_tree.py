@@ -127,16 +127,7 @@ class KmerTree:
                           for nt in ku.NTS]
         else:
             # if a model is set, use that.
-            new_leaves = []
-            for kmer in self._leaf_kmers:
-                nt_model = self._yield_model_for_kmer(kmer)  # is self.nt_freqs if not populated
-                for nt in ku.NTS:
-                    new_leaf = KmerNode(seq=kmer.seq + nt, parent=kmer,
-                                        genome=self._search_string, tree=self,
-                                        should_count=self.should_count,
-                                        nt_model=nt_model, root_k=self.root_k,
-                                        correct_aic=self.correct_aic)
-                    new_leaves.append(new_leaf)
+            new_leaves = self._extend_from_existing_leaves()
 
         self.leaf_length = new_leaves[0].length
         self.all_kmers[self.leaf_length] = {leaf.seq: leaf for leaf in new_leaves}
@@ -144,6 +135,19 @@ class KmerTree:
         self.logger.info("Grew {} k-mers of length {}".format(
             len(self._leaf_kmers),
             self.leaf_length))
+
+    def _extend_from_existing_leaves(self):
+        new_leaves = []
+        for kmer in self._leaf_kmers:
+            nt_model = self._yield_model_for_kmer(kmer)  # is self.nt_freqs if not populated
+            for nt in ku.NTS:
+                new_leaf = KmerNode(seq=kmer.seq + nt, parent=kmer,
+                                    genome=self._search_string, tree=self,
+                                    should_count=self.should_count,
+                                    nt_model=nt_model, root_k=self.root_k,
+                                    correct_aic=self.correct_aic)
+                new_leaves.append(new_leaf)
+        return new_leaves
 
     def prune_leaf_kmers(self):
         '''Remove uninteresting (defined elsewhere) k-mers from the leaves/tips of the tree
@@ -307,7 +311,11 @@ class KmerTree:
         pass
 
     def select_maximal_repeats(self):
-        '''Select the set of repeats from a grown tree maximizing k-mer length and copy number
+        '''Select the set of repeats from a grown tree maximizing k-mer length and copy number.
+
+        Sets:
+            self._maximal_kmers: [KmerNode] the list of maximal k-mers.
+            self._to_dfs: [KmerNode] ideally empty list of k-mers to explore.
         '''
         # go through _all_ k-mers, find all should_prune == False paths
         # for each path, follow it from root and apply a heuristic to decide whether each
@@ -324,6 +332,8 @@ class KmerTree:
                 if self._changepoint_calc(kmer_node):
                     maximals.append(kmer_node.parent)
                 self._to_dfs.remove(kmer_node)
+
+        assert len(self._to_dfs) == 0  # needs to be empty
 
         # add step to dedupe frameshifts
 
@@ -361,7 +371,7 @@ class KmerTree:
         pass
 
     def _infer_tandemness(self):
-        '''Infer whether some repeats are tandems of others'''
+        '''Infer whether some repeats are tandem repeats of others'''
         pass
 
     def write_results(self):
