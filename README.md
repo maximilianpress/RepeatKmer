@@ -1,8 +1,11 @@
 # RepeatKmer: a greedy suffix tree approach to repeat inference in genomes.
 
+# WORK IN PROGRESS! 
+Tests are currently failing/not implemented.  
+
 This tool implements a method to describe overrepresented sequences in a genome or other set of sequences.
 
-It uses a naive algorithm based on the suffix tree idea, but implementing a greedy method of filling the tree such that it only adds branches for overrepresented k-mers. 
+It uses a naive algorithm based on the suffix tree idea, using a greedy method of filling the tree such that it only adds branches for overrepresented k-mers. 
 
 RepeatKmer is all-Python.
 
@@ -37,7 +40,7 @@ python3 -m unittest discover
 
 ## Usage:
 ```
-python3 bin/repeat_kmer.py -f genome.fasta -o output_files_prefix
+python3 repeat_kmer.py -f genome.fasta -o output_files_prefix
 ```
 
 ## Disclosures: 
