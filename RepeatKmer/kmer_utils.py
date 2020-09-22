@@ -26,6 +26,8 @@ UNIFORM_NT_MODEL = {
     "T": 0.25
 }
 
+ROOT_DEFAULT = 4
+
 # pseudocount for frequency calculations
 # problematic- can then sum to >1!!
 FREQ_PSEUDOCOUNT = 0.001
@@ -153,7 +155,7 @@ def parse_args():
                         default='kmer_out', help='prefix of output files')
     parser.add_argument('--genome_file', '-g', required=True, type=str,
                         help='A (probably haploid genome) sequence file, FASTA format.')
-    parser.add_argument('--root_k', '-k', required=False, type=int, default=4,
-                        help="k-mer length of fully enumerated k-mers. (Default: %default)")
+    parser.add_argument('--root_k', '-k', required=False, type=int, default=ROOT_DEFAULT,
+                        help="k-mer length of fully enumerated k-mers. (Default: {})".format(ROOT_DEFAULT))
     args = parser.parse_args()
     return vars(args)
