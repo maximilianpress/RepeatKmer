@@ -210,10 +210,15 @@ class KmerTree:
                         seq = ''
                 else:
                     seq += line.strip()
+                    rc_seq = ku.rev_comp(seq)
                     # have to rescue that last sequence!!
             self.genome.append(seq)
+            self.genome.append(rc_seq)
+            for nt in ku.NTS:
+                nt_counts[nt] += seq.count(nt)
+                nt_counts[nt] += rc_seq.count(nt)
+
             total_length += len(seq)
-            self.genome.append(ku.rev_comp(seq))
         self.logger.info("Read in {} sequences of total length {} from file.".format(
             len(self.genome), total_length
         ))
@@ -223,7 +228,8 @@ class KmerTree:
 
 
         # also count nucleotide frequencies to initialize tree models
-        all_nts_counted = float(sum([nt_counts[nt] for nt in ku.NTS]))
+        all_nts_counted = float(sum(nt_counts.values()))
+        print(nt_counts)
         self._genome_nt_counts = nt_counts
         self.nt_freqs = {nt: nt_counts[nt] / all_nts_counted for nt in ku.NTS}
 
