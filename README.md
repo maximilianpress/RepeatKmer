@@ -1,7 +1,15 @@
 # RepeatKmer: a greedy suffix tree approach to repeat inference in genomes.
 
 # WORK IN PROGRESS! 
-Tests are currently failing/incomplete.  
+
+## KNOWN ISSUES/To-do:
+* Tests are currently failing/incomplete. 
+* Need to address redundancies in maximal (output) k-mers.
+* Currently rather slow on larger genomes (~1hr for E. coli, ~2-3hr for S. cerevisiae).
+* Need to deduplicate frame-shifted or reverse-complemented maximal k-mers.
+* Need to do fuzzy matching between maximal k-mers --> group into families
+* Annotate input genome with repeats 
+* Minimap2 option to find inexact additional copies
 
 This tool implements a method to describe overrepresented sequences in a genome or other set of sequences.
 
