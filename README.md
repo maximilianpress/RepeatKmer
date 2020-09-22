@@ -1,7 +1,7 @@
 # RepeatKmer: a greedy suffix tree approach to repeat inference in genomes.
 
 # WORK IN PROGRESS! 
-Tests are currently failing/not implemented.  
+Tests are currently failing/incomplete.  
 
 This tool implements a method to describe overrepresented sequences in a genome or other set of sequences.
 
