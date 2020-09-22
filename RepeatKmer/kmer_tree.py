@@ -344,6 +344,8 @@ class KmerTree:
 
         # add step to dedupe frameshifts
 
+        # add step to dedupe on simple sequence itself!! why is this happening??!?
+
         for maximal in maximals:
             rc = ku.rev_comp(maximal.seq)
             if rc in self.all_kmers[len(rc)]:
