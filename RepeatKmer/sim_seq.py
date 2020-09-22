@@ -123,7 +123,7 @@ class SeqGenerator(object):
             from RepeatKmer.kmer_tree import KmerTree
         except ImportError as e:
             raise e
-        tree = KmerTree(root_k=self.root_k, genome_file=genome_model)
+        tree = KmerTree(root_k=self.root_k, genome_file=self.genome_model)
         tree.inialize_kmers()
         tree._generate_models_from_stem()
         self.model = tree.models[self.root_k]
