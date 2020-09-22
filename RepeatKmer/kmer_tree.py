@@ -304,9 +304,10 @@ class KmerTree:
             #self.logger.info("Explored past a tip of length {}, breaking DFS".format(kmer.length - 1))
             is_maximal = True
         else:
-            if len(kmer.children) == 0:
+            if len(kmer.children) == 0 and kmer.length > self.root_k:
                 raise ku.KmerError("Kmer {} is unpruned but has no children! Something weird is going on!".format(kmer.seq))
-            self._to_dfs.extend([child for child in kmer.children])
+            for child in kmer.children:
+                self._to_dfs.extend([child])
 
         if not is_maximal and (kmer.segment_score() < self.dseg_threshold) and (kmer.parent not in self._maximal_kmers):
             is_maximal = True

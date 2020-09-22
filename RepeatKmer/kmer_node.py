@@ -231,5 +231,8 @@ class KmerNode:
 
     def segment_score(self):
         '''compute a changepoint score for a given k-mer (based on its children'''
+        # some root k-mers will come in here without children, just reject them.
+        if len(self.children) == 0:
+            return -1e9
         return max([self.child_proportion(child) for child in self.children])
 
