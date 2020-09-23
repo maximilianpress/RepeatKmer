@@ -3,8 +3,18 @@
 This script is to benchmark the power of my AICc implementation on my models
 for various sample sizes and k-mer frequencies.
 '''
+import sys
+import os
 
-import RepeatKmer.kmer_utils as ku
+#PACKAGE_PARENT = '..'
+#SCRIPT_DIR = os.path.dirname(os.path.realpath(os.path.join(os.getcwd(), os.path.expanduser(__file__))))
+#sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
+#sys.path.append(os.path.normpath(os.path.join(PACKAGE_PARENT)))
+#sys.path.append(os.path.normpath("."))
+#print(sys.path)
+
+#import RepeatKmer.kmer_utils as ku
+from RepeatKmer.kmer_utils import UNIFORM_NT_MODEL, log_likelihood, calc_aic_c, calc_aic, ALT_MODEL_PARAMS, NULL_MODEL_PARAMS
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -18,7 +28,7 @@ EMPTY_MODEL = {
 
 class Benchmark:
     def __init__(self, max_count, step_num=1, count_of_others=0,
-                 null_model=ku.UNIFORM_NT_MODEL):
+                 null_model=UNIFORM_NT_MODEL):
         self.max_count = max_count
         self.step_num = step_num
         self.count_of_others = count_of_others
@@ -44,16 +54,16 @@ class Benchmark:
                 continue
 
             alt_model = {nt: data[nt] / total for nt in data}
-            alt_ll = ku.log_likelihood(data=data, model=alt_model)
-            null_ll = ku.log_likelihood(data=data, model=self.null_model)
+            alt_ll = log_likelihood(data=data, model=alt_model)
+            null_ll = log_likelihood(data=data, model=self.null_model)
             if corrected:
-                alt = ku.calc_aic_c(ll=alt_ll, num_obs=total,
-                                          n_param=ku.ALT_MODEL_PARAMS)
-                null = ku.calc_aic_c(ll=null_ll, n_param=ku.NULL_MODEL_PARAMS,
+                alt = calc_aic_c(ll=alt_ll, num_obs=total,
+                                          n_param=ALT_MODEL_PARAMS)
+                null = calc_aic_c(ll=null_ll, n_param=NULL_MODEL_PARAMS,
                                            num_obs=sum(data.values()))
             else:
-                alt = ku.calc_aic(ll=alt_ll, n_param=ku.ALT_MODEL_PARAMS)
-                null = ku.calc_aic(ll=null_ll, n_param=ku.NULL_MODEL_PARAMS)
+                alt = calc_aic(ll=alt_ll, n_param=ALT_MODEL_PARAMS)
+                null = calc_aic(ll=null_ll, n_param=NULL_MODEL_PARAMS)
             results.append(null - alt)
             print(i, "AICc" if corrected else "AIC", null-alt, count_of_others)
         return results
