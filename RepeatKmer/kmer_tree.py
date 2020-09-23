@@ -66,6 +66,11 @@ class KmerTree:
             self._grow_leaf_kmers()  # increments self.leaf_length
             self.logger.info("Initialized k-mers of length {}".format(self.leaf_length))
             self.analyze_leaves(model_calc=False)
+            #if self.leaf_length < (self.root_k -1):
+            #    self.analyze_leaves(model_calc=False)
+            #elif self.leaf_length == self.root_k:
+            #    self.analyze_leaves(model_calc=True)
+
 
     def _generate_models_from_stem(self):
         '''Post-initialization, set up the model to be used by the greedy heuristic.
@@ -172,6 +177,8 @@ class KmerTree:
             if leaf.seq == "root":
                 raise ku.KmerError("Root k-mer should not be in leaves!")
             if leaf.should_prune:
+                if self.debug:
+                    print("pruning {}".format(leaf.seq))
                 continue
             leaf.populate_sisters()
             if model_calc:
@@ -179,7 +186,7 @@ class KmerTree:
         if self.debug:
             self.logger.error("(Not actually an error!)\nLeaf k-mers:\n{}".format(
                 "\n".join(" ".join(
-                    [k.seq, str(k.obs_exp_ratio), str(k.count), str(k.dAIC)]
+                    [k.seq, str(k.obs_exp_ratio), str(k.count), str(k.dAIC), str(k.should_prune)]
                 ) for k in self._leaf_kmers)))
 
 
