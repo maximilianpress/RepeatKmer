@@ -1,11 +1,12 @@
 # RepeatKmer: a greedy suffix tree approach to repeat inference in genomes.
 
 # WORK IN PROGRESS! 
+At the moment, the tool is finding the conserved portions of Ty1 elements in the _S. cerevisiae_ genome, which suggests that it is more or less working. Heavy filtering of outputs is still necessary to get at this, and there are many known issues (see below). But the tool is now functional enough that I can probably make it public. 
 
 ## KNOWN ISSUES/To-do:
-* Tests are currently failing/incomplete. 
-* Need to address redundancies in maximal (output) k-mers.
-* Currently rather slow on larger genomes (~1hr for E. coli, ~2-3hr for S. cerevisiae).
+* Tests are currently incomplete. 
+* Need to address redundancies in maximal (output) k-mers. These indicate duplication in the k-mer tree, which may explain poor perf.
+* Currently VERY slow on larger genomes (~1hr for E. coli, ~100hr (!!!) for S. cerevisiae).
 * Need to deduplicate frame-shifted or reverse-complemented maximal k-mers.
 * Need to do fuzzy matching between maximal k-mers --> group into families
 * Annotate input genome with repeats 
