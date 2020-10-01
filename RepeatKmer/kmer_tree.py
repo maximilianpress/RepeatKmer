@@ -81,12 +81,6 @@ class KmerTree:
         if self.root_k == 1:
             self.logger.info("Using simple nucleotide frequencies for all models.")
             self.model = self.nt_freqs
-            # why does this screw things up?
-            #self.model["A"] = (self.model["A"] + self.model["T"]) / sum(self.model.values())
-            #self.model["T"] = (self.model["A"] + self.model["T"]) / sum(self.model.values())
-            #self.model["G"] = (self.model["G"] + self.model["C"]) / sum(self.model.values())
-            #self.model["C"] = (self.model["G"] + self.model["C"]) / sum(self.model.values())
-
 
         else:
             self.logger.info("Generating k-mer frequency models.")
