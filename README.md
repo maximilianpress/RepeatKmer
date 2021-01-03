@@ -1,5 +1,11 @@
 # RepeatKmer: a greedy suffix tree approach to repeat inference in genomes.
-![](https://github.com/maximilianpress/RepeatKmer/workflows/RepKmerMaster/badge.svg)
+![master tests](https://github.com/maximilianpress/RepeatKmer/workflows/RepKmerMaster/badge.svg)
+
+This tool implements a method to describe overrepresented sequences in a genome or other set of sequences.
+
+It uses a naive algorithm based on the suffix tree idea, using a greedy method of filling the tree such that it only adds branches for overrepresented k-mers.
+
+RepeatKmer is all-Python.
 
 # WORK IN PROGRESS! 
 At the moment, the tool is finding the conserved portions of Ty1 elements in the _S. cerevisiae_ genome, which suggests that it is more or less working. Heavy filtering of outputs is still necessary to get at this, and there are many known issues (see below). But the tool is now functional enough that I can probably make it public. 
@@ -12,12 +18,6 @@ At the moment, the tool is finding the conserved portions of Ty1 elements in the
 * Need to do fuzzy matching between maximal k-mers --> group into families
 * Annotate input genome with repeats 
 * Minimap2 option to find inexact additional copies
-
-This tool implements a method to describe overrepresented sequences in a genome or other set of sequences.
-
-It uses a naive algorithm based on the suffix tree idea, using a greedy method of filling the tree such that it only adds branches for overrepresented k-mers. 
-
-RepeatKmer is all-Python.
 
 ## Installation:
 Depends on:
