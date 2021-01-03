@@ -1,4 +1,5 @@
 # RepeatKmer: a greedy suffix tree approach to repeat inference in genomes.
+![](https://github.com/maximilianpress/RepeatKmer/workflows/RepKmerMaster/badge.svg)
 
 # WORK IN PROGRESS! 
 At the moment, the tool is finding the conserved portions of Ty1 elements in the _S. cerevisiae_ genome, which suggests that it is more or less working. Heavy filtering of outputs is still necessary to get at this, and there are many known issues (see below). But the tool is now functional enough that I can probably make it public. 
