@@ -225,8 +225,7 @@ class KmerNode:
             ))
 
         if self._children_proportions is None:
-            self._children_proportions = {daughter: (daughter.count / self.count)
-                                         for daughter in self.children}
+            self._children_proportions = dict([(daughter, (daughter.count / self.count)) for daughter in self.children])
         return self._children_proportions[child]
 
     def segment_score(self):

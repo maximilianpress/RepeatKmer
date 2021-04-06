@@ -2,4 +2,5 @@ biopython
 numpy
 pandas
 fuzzywuzzy
+setuptools
 

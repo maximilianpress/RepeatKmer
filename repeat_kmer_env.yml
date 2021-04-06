@@ -9,4 +9,4 @@ dependencies:
   - biopython
   - fuzzywuzzy
   - pytest
-
+  - setuptools
