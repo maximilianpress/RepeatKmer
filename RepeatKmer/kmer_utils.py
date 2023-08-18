@@ -155,7 +155,14 @@ def parse_args():
                         default='kmer_out', help='prefix of output files')
     parser.add_argument('--genome_file', '-g', required=True, type=str,
                         help='A (probably haploid genome) sequence file, FASTA format.')
+    parser.add_argument('--correct_aic', '-C', required=False, action="store_true", default=False, 
+                        help="Whether to use AICc rather than AIC. Default: AIC")
     parser.add_argument('--root_k', '-k', required=False, type=int, default=ROOT_DEFAULT,
                         help="k-mer length of fully enumerated k-mers. (Default: {})".format(ROOT_DEFAULT))
+    parser.add_argument('--max_k', '-m', required=False, type=int, default=None,
+                        help="maximum k-mer length of k-mers to extend to. (Default: No maximum)")
+    parser.add_argument('--rc_genome', '-rc', required=False, default=False,
+                        help="whether or not to consider the genome's RC", action="store_true")                        
+
     args = parser.parse_args()
     return vars(args)

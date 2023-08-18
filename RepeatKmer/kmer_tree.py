@@ -20,7 +20,8 @@ from RepeatKmer.kmer_node import KmerNode
 
 class KmerTree:
     def __init__(self, root_k, genome_file, should_count=True, dseg_threshold=0.8,
-                 out_prefix="out_kmer", logger=None, debug=False, correct_aic=False):
+                 out_prefix="out_kmer", logger=None, debug=False, correct_aic=False,
+                 max_k=None, rc_genome=True):
         '''A tree structure to hold K-mers and their interrelationships.
 
         Args:
@@ -31,10 +32,12 @@ class KmerTree:
             logger (logger.logger): a logger object which can be passed and used.
 
         '''
+        self.max_k = max_k
         self.root_k = root_k
         self._leaf_kmers = None
         self.genome_file = genome_file
         self.genome = None
+        self.rc_genome = rc_genome
         self._genome_length = None
         self.all_kmers = {}
         self.should_count = should_count
@@ -51,7 +54,9 @@ class KmerTree:
         self.debug = debug
         self.correct_aic = correct_aic
         self._search_string = None
-
+        self.max_k = max_k
+        
+        print(f"aic is {correct_aic}")
         if logger is None:
             self.logger = ku.setup_logger()
         else:
@@ -104,7 +109,7 @@ class KmerTree:
             self.logger.info("Grew k-mers of length {}".format(self.leaf_length))
             self.analyze_leaves()
             self.prune_leaf_kmers()
-            if len(self._leaf_kmers) == 0:
+            if len(self._leaf_kmers) == 0 or (self.max_k and self.leaf_length > self.max_k):
                 extend_leaves = False
         self.logger.info("Finished greedily extending leaf k-mers.\n"
                          "Longest k-mer is {}.".format(self.leaf_length))
@@ -200,12 +205,15 @@ class KmerTree:
                         if len(seq) > longest_seq:
                             longest_seq = len(seq)
                         seq = seq.upper()
-                        rc_seq = ku.rev_comp(seq)
                         for nt in ku.NTS:
                             nt_counts[nt] += seq.count(nt)
-                            nt_counts[nt] += rc_seq.count(nt)
                         self.genome.append(seq)
-                        self.genome.append(rc_seq)
+
+                        if self.rc_genome:
+                            rc_seq = ku.rev_comp(seq)
+                            for nt in ku.NTS:
+                                nt_counts[nt] += rc_seq.count(nt)
+                            self.genome.append(rc_seq)
                         total_length += len(seq)
                         #self.logger.info(total_length)
                         seq = ''
@@ -305,7 +313,10 @@ class KmerTree:
             #self.logger.info("Explored past a tip of length {}, breaking DFS".format(kmer.length - 1))
             is_maximal = True
         else:
-            if len(kmer.children) == 0 and kmer.length > self.root_k:
+            if len(kmer.children) == 0 and kmer.length > self.root_k and self.max_k is None:
+                #self.logger.warning(
+                #"Kmer {} is unpruned but has no children! Something weird is going on!\n"
+                #"Or possibly it is at end of contig?!?".format(kmer.seq))
                 raise ku.KmerError("Kmer {} is unpruned but has no children! Something weird is going on!".format(kmer.seq))
             for child in kmer.children:
                 self._to_dfs.extend([child])
