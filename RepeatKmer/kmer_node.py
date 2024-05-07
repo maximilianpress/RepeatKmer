@@ -25,7 +25,8 @@ class KmerNode:
     def __init__(self, seq, parent, genome=None, nt_model=ku.UNIFORM_NT_MODEL, root_k=None,
                  should_count=True, tree=None, daic_threshold=0.0001, ratio_threshold=1.0,
                  freq_pseudocount=ku.FREQ_PSEUDOCOUNT, alt_model_params=ku.ALT_MODEL_PARAMS,
-                 changepoint_thresh=ku.PROP_THRESH, correct_aic=False):
+                 alphabet=ku.NTS,
+                 null_params=ku.NULL_MODEL_PARAMS, changepoint_thresh=ku.PROP_THRESH, correct_aic=False):
         '''
         Args:
             seq ():
@@ -72,13 +73,14 @@ class KmerNode:
         self.dAIC = None
         self.inferred_model = False
         self.alt_model_params = alt_model_params
+        self.null_params = null_params
         self._children_proportions = None
         self._d_score = None
         self.substring_of = None
         self.superstring_of = None
         self.changepoint_thresh = changepoint_thresh
         self.correct_aic = correct_aic
-
+        self.alphabet = alphabet
 
         if self.parent is not None:
             self.parent.children.append(self)
@@ -129,11 +131,11 @@ class KmerNode:
             if self.correct_aic:
                 alt_aic = ku.calc_aic_c(ll=alt_ll, num_obs=sum(data.values()),
                                         n_param=self.alt_model_params)
-                null_aic = ku.calc_aic_c(ll=null_ll, n_param=ku.NULL_MODEL_PARAMS,
+                null_aic = ku.calc_aic_c(ll=null_ll, n_param=self.null_params,
                                          num_obs=sum(data.values()))
             else:
                 alt_aic = ku.calc_aic(ll=alt_ll, n_param=self.alt_model_params)
-                null_aic = ku.calc_aic(ll=null_ll, n_param=ku.NULL_MODEL_PARAMS)
+                null_aic = ku.calc_aic(ll=null_ll, n_param=self.null_params)
             self._alt_aic = alt_aic
             self._null_aic = null_aic
             self.dAIC = null_aic - alt_aic
@@ -158,7 +160,7 @@ class KmerNode:
             pass
         else:
             # i'm here to keep my eye on her
-            sister_seqs = [self.seq[:-1] + nt for nt in ku.NTS if nt != self.terminal_nt]
+            sister_seqs = [self.seq[:-1] + nt for nt in self.alphabet if nt != self.terminal_nt]
             self._sisters = [self.tree.access_kmer(sister) for sister in sister_seqs]
 
             # there were never such devoted sisters
@@ -199,11 +201,17 @@ class KmerNode:
         elif self.count == 0:
             self.should_prune = True
         # she wore the dress- and i stayed home!
-        elif (self.dAIC > self.daic_threshold) and (
-                    self.obs_exp_ratio > self.ratio_threshold):
+        elif (
+            self.dAIC > self.daic_threshold
+        ) and (
+            self.obs_exp_ratio > self.ratio_threshold
+        ):
             self.should_prune = False
-        elif (self.dAIC < self.daic_threshold) or (
-                    self.obs_exp_ratio < self.ratio_threshold):
+        elif (
+            self.dAIC < self.daic_threshold
+        ) or (
+            self.obs_exp_ratio < self.ratio_threshold
+        ):
             self.should_prune = True
         # this happens when you try to do np.inf - np.inf!
         elif np.isnan(self.dAIC):
@@ -213,6 +221,7 @@ class KmerNode:
             print(self.dAIC)
             raise ku.KmerError("was unable to decide whether or not to prune a k-mer! "
                                "dAIC {}".format(self.dAIC))
+        #print(self.seq, self.count, self.dAIC, self.obs_exp_ratio, self.alt_model_params, self.null_params)
 
     def child_proportion(self, child):
         '''Estimate the proportion of the present k-mer represented by each child

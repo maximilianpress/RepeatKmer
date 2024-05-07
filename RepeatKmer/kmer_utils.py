@@ -18,6 +18,10 @@ from copy import deepcopy
 
 
 NTS = ["A", "C", "G", "T"]
+AAS = [
+    "A", "C", "D", "E", "F", "G", "H", "I", "K", "L",
+    "M", "N", "P", "Q", "R", "S", "T", "V", "W", "Y",
+]
 TAB = str.maketrans("ACGTN", "TGCAN")
 UNIFORM_NT_MODEL = {
     "A": 0.25,
@@ -26,7 +30,7 @@ UNIFORM_NT_MODEL = {
     "T": 0.25
 }
 
-ROOT_DEFAULT = 4
+ROOT_DEFAULT = 2
 
 # pseudocount for frequency calculations
 # problematic- can then sum to >1!!
@@ -162,7 +166,10 @@ def parse_args():
     parser.add_argument('--max_k', '-m', required=False, type=int, default=None,
                         help="maximum k-mer length of k-mers to extend to. (Default: No maximum)")
     parser.add_argument('--rc_genome', '-rc', required=False, default=False,
-                        help="whether or not to consider the genome's RC", action="store_true")                        
+                        help="whether or not to consider the genome's RC", action="store_true")
+    parser.add_argument('--proteome', '-p', required=False, default=False,
+                        help="treat as proteome (aa) rather than genome.", action="store_true")
+    
 
     args = parser.parse_args()
     return vars(args)

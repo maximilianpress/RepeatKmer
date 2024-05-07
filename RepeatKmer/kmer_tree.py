@@ -21,7 +21,7 @@ from RepeatKmer.kmer_node import KmerNode
 class KmerTree:
     def __init__(self, root_k, genome_file, should_count=True, dseg_threshold=0.8,
                  out_prefix="out_kmer", logger=None, debug=False, correct_aic=False,
-                 max_k=None, rc_genome=True):
+                 max_k=None, rc_genome=True, alphabet=ku.NTS):
         '''A tree structure to hold K-mers and their interrelationships.
 
         Args:
@@ -55,6 +55,9 @@ class KmerTree:
         self.correct_aic = correct_aic
         self._search_string = None
         self.max_k = max_k
+        self.alphabet = alphabet
+        self.null_params = len(alphabet) - 1
+        self.alt_params = 2 * len(alphabet) - 1
         
         print(f"aic is {correct_aic}")
         if logger is None:
@@ -122,13 +125,20 @@ class KmerTree:
             len(self._leaf_kmers) if self.leaf_length else 0))
 
         if self._leaf_kmers is None:
-            root_node = KmerNode(seq="root", parent=None, genome=self._search_string, tree=self,
-                                 should_count=False, root_k=self.root_k,
-                                 correct_aic=self.correct_aic)
-            new_leaves = [KmerNode(seq=nt, parent=root_node, genome=self._search_string, tree=self,
-                                   should_count=self.should_count, nt_model=self.nt_freqs,
-                                   root_k=self.root_k, correct_aic=self.correct_aic)
-                          for nt in ku.NTS]
+            root_node = KmerNode(
+                seq="root", parent=None, genome=self._search_string, tree=self,
+                should_count=False, root_k=self.root_k,
+                correct_aic=self.correct_aic, alt_model_params=self.alt_params,
+                null_params=self.null_params, alphabet=self.alphabet
+            )
+            new_leaves = [KmerNode(
+                seq=nt, parent=root_node, genome=self._search_string, tree=self,
+                should_count=self.should_count, nt_model=self.nt_freqs,
+                root_k=self.root_k, correct_aic=self.correct_aic, 
+                alt_model_params=self.alt_params, null_params=self.null_params,
+                alphabet=self.alphabet,
+            )
+            for nt in self.alphabet]
         else:
             # if a model is set, use that.
             new_leaves = self._extend_from_existing_leaves()
@@ -144,12 +154,17 @@ class KmerTree:
         new_leaves = []
         for kmer in self._leaf_kmers:
             nt_model = self._yield_model_for_kmer(kmer)  # is self.nt_freqs if not populated
-            for nt in ku.NTS:
-                new_leaf = KmerNode(seq=kmer.seq + nt, parent=kmer,
-                                    genome=self._search_string, tree=self,
-                                    should_count=self.should_count,
-                                    nt_model=nt_model, root_k=self.root_k,
-                                    correct_aic=self.correct_aic)
+            for nt in self.alphabet:
+                new_leaf = KmerNode(
+                    seq=kmer.seq + nt, parent=kmer,
+                    genome=self._search_string, tree=self,
+                    should_count=self.should_count,
+                    nt_model=nt_model, root_k=self.root_k,
+                    correct_aic=self.correct_aic,
+                    alt_model_params=self.alt_params,
+                    null_params=self.null_params,
+                    alphabet=self.alphabet,
+                )
                 new_leaves.append(new_leaf)
         return new_leaves
 
@@ -163,7 +178,7 @@ class KmerTree:
 
         self._leaf_kmers[:] = [kmer for kmer in self._leaf_kmers if not kmer.should_prune]
         end_leaves = len(self._leaf_kmers)
-        self.logger.info("Started with {} leaf k-mers, pruned {} failing AIC test,"
+        self.logger.info("Started with {} leaf k-mers\npruned {} failing AIC test\n"
                          "retained {} after pruning.".format(
                              start_leaves, (start_leaves - end_leaves), end_leaves)
                          )
@@ -195,7 +210,7 @@ class KmerTree:
         self.logger.info("Reading in genome seq from file {}".format(self.genome_file))
         longest_seq = 0
         self.genome = []
-        nt_counts = {nt: 0 for nt in ku.NTS}
+        nt_counts = {nt: 0 for nt in self.alphabet}
         total_length = 0
         with open(self.genome_file) as file:
             seq = ''
@@ -205,13 +220,13 @@ class KmerTree:
                         if len(seq) > longest_seq:
                             longest_seq = len(seq)
                         seq = seq.upper()
-                        for nt in ku.NTS:
+                        for nt in self.alphabet:
                             nt_counts[nt] += seq.count(nt)
                         self.genome.append(seq)
 
                         if self.rc_genome:
                             rc_seq = ku.rev_comp(seq)
-                            for nt in ku.NTS:
+                            for nt in self.alphabet:
                                 nt_counts[nt] += rc_seq.count(nt)
                             self.genome.append(rc_seq)
                         total_length += len(seq)
@@ -223,7 +238,7 @@ class KmerTree:
                     # have to rescue that last sequence!!
             self.genome.append(seq)
             self.genome.append(rc_seq)
-            for nt in ku.NTS:
+            for nt in self.alphabet:
                 nt_counts[nt] += seq.count(nt)
                 nt_counts[nt] += rc_seq.count(nt)
 
@@ -240,7 +255,7 @@ class KmerTree:
         all_nts_counted = float(sum(nt_counts.values()))
         print(nt_counts)
         self._genome_nt_counts = nt_counts
-        self.nt_freqs = {nt: nt_counts[nt] / all_nts_counted for nt in ku.NTS}
+        self.nt_freqs = {nt: nt_counts[nt] / all_nts_counted for nt in self.alphabet}
 
     def yield_all_kmer_seqs(self):
         '''Yield a list of all the k-mer sequences
@@ -344,7 +359,7 @@ class KmerTree:
         # store each such notable kmer in an appropriate structure.
         maximals = list()
         self._maximal_kmers = list()
-        self._to_dfs = [self.access_kmer(nt) for nt in ku.NTS]
+        self._to_dfs = [self.access_kmer(nt) for nt in self.alphabet]
         # easier to just DFS the tree once?
         while len(self._to_dfs) > 0:
             for kmer_node in self._to_dfs:
